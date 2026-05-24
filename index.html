@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Создать заказ</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:     #ffffff;
+  --bg2:    #f2f2f7;
+  --bg3:    #e5e5ea;
+  --text:   #111111;
+  --hint:   #8e8e93;
+  --accent: #3390ec;
+  --atxt:   #ffffff;
+  --border: rgba(0,0,0,0.09);
+  --danger: #e53935;
+  --green:  #34c759;
+  --radius: 16px;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: pan-x pan-y;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* --- Progress --- */
+.prog {
+  flex-shrink: 0;
+  padding: 14px 20px 0;
+  display: flex;
+  gap: 8px;
+}
+.pdot {
+  flex: 1; height: 4px;
+  border-radius: 2px;
+  background: var(--bg3);
+  transition: background 0.3s;
+}
+.pdot.active { background: var(--accent); }
+.pdot.done   { background: var(--green); }
+
+/* --- Header --- */
+.shdr {
+  flex-shrink: 0;
+  padding: 14px 20px 8px;
+}
+.slbl {
+  font-size: 12px; font-weight: 600;
+  color: var(--hint); text-transform: uppercase;
+  letter-spacing: 0.8px; margin-bottom: 4px;
+}
+.stitle { font-size: 22px; font-weight: 700; line-height: 1.2; }
+
+/* --- Body --- */
+.sbody {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 14px 20px;
+  overscroll-behavior: contain;
+  min-height: 0;
+}
+.sbody::-webkit-scrollbar { display: none; }
+
+/* --- Bottom bar --- */
+.bbar {
+  flex-shrink: 0;
+  padding: 12px 20px;
+  padding-bottom: max(16px, calc(env(safe-area-inset-bottom, 0px) + 12px));
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 12px;
+}
+.bbk {
+  width: 54px; height: 56px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg2); color: var(--text);
+  font-size: 22px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  -webkit-appearance: none; appearance: none;
+}
+.bbk:active { opacity: 0.6; }
+
+.bnx {
+  flex: 1; height: 56px;
+  border: none; border-radius: var(--radius);
+  background: var(--accent); color: var(--atxt);
+  font-size: 17px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  letter-spacing: 0.2px;
+  transition: opacity 0.15s;
+  box-shadow: 0 4px 14px rgba(51,144,236,0.35);
+  -webkit-appearance: none; appearance: none;
+}
+.bnx:active   { opacity: 0.8; }
+.bnx:disabled { opacity: 0.45; box-shadow: none; }
+.bnx.ok  { background: var(--green); box-shadow: 0 4px 14px rgba(52,199,89,0.35); }
+.bnx.bad { background: var(--danger); box-shadow: none; }
+
+/* --- Fields --- */
+.field { position: relative; margin-bottom: 14px; }
+
+input[type="text"],
+input[type="number"],
+textarea {
+  width: 100%;
+  padding: 15px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg2); color: var(--text);
+  font-size: 16px; font-family: inherit;
+  outline: none;
+  -webkit-appearance: none; appearance: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.binp { font-size: 18px !important; padding: 18px 16px !important; font-weight: 500; }
+input[type="number"] { -moz-appearance: textfield; }
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(51,144,236,0.12);
+  background: var(--bg);
+}
+input::placeholder, textarea::placeholder { color: var(--hint); }
+textarea { resize: none; min-height: 84px; }
+input.herr, textarea.herr {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 3px rgba(229,57,53,0.1);
+}
+.emsg { color: var(--danger); font-size: 13px; margin-top: 6px; margin-left: 4px; display: none; }
+.emsg.show { display: block; }
+
+/* --- Dropdown --- */
+.drop {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+  z-index: 300;
+  max-height: 200px; overflow-y: auto;
+  display: none;
+}
+.drop.open { display: block; }
+.ditem {
+  padding: 14px 16px; font-size: 16px;
+  border-bottom: 1px solid var(--border); cursor: pointer;
+}
+.ditem:last-child { border-bottom: none; }
+.ditem:active { background: var(--bg2); }
+
+/* --- Item cards --- */
+.icard {
+  background: var(--bg2);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  padding: 14px; margin-bottom: 12px;
+}
+.irow { display: flex; gap: 10px; align-items: flex-start; }
+.inwrap { flex: 1; position: relative; }
+.iqwrap { width: 80px; flex-shrink: 0; }
+.rmbtn {
+  width: 38px; height: 38px;
+  background: none; border: none;
+  color: var(--danger); font-size: 26px;
+  cursor: pointer; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 6px; flex-shrink: 0; opacity: 0.75;
+  -webkit-appearance: none;
+}
+.rmbtn:active { opacity: 1; background: rgba(229,57,53,0.08); }
+
+.tcmt {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 10px; color: var(--accent); font-size: 14px;
+  cursor: pointer; user-select: none; font-weight: 500;
+}
+.tcmt .ic {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--accent); color: var(--atxt);
+  font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.carea { margin-top: 10px; display: none; }
+.carea.open { display: block; }
+
+.badd {
+  width: 100%; padding: 15px;
+  border: 2px dashed rgba(51,144,236,0.4);
+  border-radius: var(--radius);
+  background: rgba(51,144,236,0.04);
+  color: var(--accent); font-size: 16px; font-weight: 600;
+  cursor: pointer; margin-bottom: 6px; font-family: inherit;
+  -webkit-appearance: none;
+}
+.badd:active { opacity: 0.7; }
+#anchor { height: 1px; visibility: hidden; pointer-events: none; }
+
+/* --- Confirm --- */
+.cblock {
+  background: var(--bg2); border-radius: var(--radius);
+  border: 1.5px solid var(--border); padding: 16px; margin-bottom: 14px;
+}
+.cstitle {
+  font-size: 12px; font-weight: 600; color: var(--hint);
+  text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 10px;
+}
+.coval { font-size: 18px; font-weight: 700; line-height: 1.3; }
+.citem {
+  display: flex; align-items: flex-start;
+  gap: 12px; padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.citem:last-child { border-bottom: none; padding-bottom: 0; }
+.cnum {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--accent); color: var(--atxt);
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.cname { flex: 1; font-size: 16px; font-weight: 600; line-height: 1.3; }
+.cqty  { font-size: 15px; color: var(--hint); flex-shrink: 0; font-weight: 500; }
+.ccmt  { font-size: 13px; color: var(--hint); margin-top: 3px; }
+
+/* --- Success screen --- */
+#succ {
+  display: none; position: fixed; inset: 0;
+  flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 40px 24px;
+  background: var(--bg); z-index: 999;
+}
+#succ.show { display: flex; }
+.sico  { font-size: 72px; margin-bottom: 20px; }
+.stit  { font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+.ssub  { font-size: 16px; color: var(--hint); margin-bottom: 36px; line-height: 1.5; }
+.bnew {
+  padding: 17px 36px; border: none; border-radius: var(--radius);
+  background: var(--accent); color: var(--atxt);
+  font-size: 17px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  box-shadow: 0 4px 18px rgba(51,144,236,0.35);
+  -webkit-appearance: none;
+}
+.bnew:active { opacity: 0.85; }
+
+/* --- Loading screen --- */
+#loading {
+  display: flex; position: fixed; inset: 0;
+  flex-direction: column; align-items: center; justify-content: center;
+  background: var(--bg); z-index: 1000;
+}
+.spin {
+  width: 40px; height: 40px;
+  border: 3px solid var(--bg3);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin-bottom: 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.ldtxt { color: var(--hint); font-size: 15px; }
+
+/* --- Animations --- */
+@keyframes sRight {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes sLeft {
+  from { opacity: 0; transform: translateX(-28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.aright { animation: sRight 0.22s ease; }
+.aleft  { animation: sLeft  0.22s ease; }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spin"></div>
+  <div class="ldtxt">Загрузка...</div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="prog">
+    <div class="pdot" id="d1"></div>
+    <div class="pdot" id="d2"></div>
+    <div class="pdot" id="d3"></div>
+  </div>
+  <div class="shdr">
+    <div class="slbl" id="slbl"></div>
+    <div class="stitle" id="stit"></div>
+  </div>
+
+  <div id="s1" class="sbody" style="display:none">
+    <div class="field">
+      <input type="text" id="objInp" class="binp" placeholder="Например: ул. Ленина 42" autocomplete="off">
+      <div class="drop" id="objDrop"></div>
+      <div class="emsg" id="objErr">Укажите объект</div>
+    </div>
+  </div>
+
+  <div id="s2" class="sbody" style="display:none">
+    <div id="ilist"></div>
+    <button class="badd" id="addBtn">＋ Добавить товар</button>
+    <div id="anchor"></div>
+  </div>
+
+  <div id="s3" class="sbody" style="display:none">
+    <div class="cblock">
+      <div class="cstitle">📦 Объект</div>
+      <div class="coval" id="cobj"></div>
+    </div>
+    <div class="cblock">
+      <div class="cstitle">🛒 Товары</div>
+      <div id="citems"></div>
+    </div>
+  </div>
+
+  <div class="bbar">
+    <button class="bbk" id="btnBack" style="display:none">←</button>
+    <button class="bnx" id="btnNext">Далее →</button>
+  </div>
+</div>
+
+<div id="succ">
+  <div class="sico">✅</div>
+  <div class="stit">Заказ отправлен!</div>
+  <div class="ssub">Детали заказа отправлены вам в чат</div>
+  <button class="bnew" id="btnNew">🛒 Создать новый заказ</button>
+</div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+// Замените на ваш реальный токен и ID таблицы
+var GAS_URL        = 'https://script.google.com/macros/s/AKfycbx8pvE4OPiDjYPG0adZuGzqss5x08rr32IsaXTgIBj3ras_VyrS35cQDd8pJo9Ff_P-gQ/exec';
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Prevent multi-touch zoom
+document.addEventListener('gesturestart',  function(e){ e.preventDefault(); }, { passive: false });
+document.addEventListener('gesturechange', function(e){ e.preventDefault(); }, { passive: false });
+document.addEventListener('gestureend',    function(e){ e.preventDefault(); }, { passive: false });
+document.addEventListener('touchmove', function(e){ if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+
+// ─── TELEGRAM WEBAPP INIT ────────────────────────────────────────────────────
+var tg = window.Telegram && window.Telegram.WebApp;
+
+var USER_ID    = '';
+var USERNAME   = '';
+var USER_NAME  = 'Пользователь';
+var CHAT_ID    = '';
+var MESSAGE_ID = '';
+
+if (tg) {
+  tg.ready();
+  tg.expand();
+
+  // Цвета из темы Telegram
+  if (tg.themeParams) {
+    var tp = tg.themeParams;
+    if (tp.bg_color)           document.documentElement.style.setProperty('--bg',     tp.bg_color);
+    if (tp.secondary_bg_color) document.documentElement.style.setProperty('--bg2',    tp.secondary_bg_color);
+    if (tp.text_color)         document.documentElement.style.setProperty('--text',   tp.text_color);
+    if (tp.hint_color)         document.documentElement.style.setProperty('--hint',   tp.hint_color);
+    if (tp.button_color)       document.documentElement.style.setProperty('--accent', tp.button_color);
+    if (tp.button_text_color)  document.documentElement.style.setProperty('--atxt',   tp.button_text_color);
+  }
+
+  // Данные пользователя из initDataUnsafe
+  var initData = tg.initDataUnsafe || {};
+  var user = initData.user || {};
+
+  USER_ID   = user.id         ? user.id.toString()       : '';
+  USERNAME  = user.username   ? user.username             : '';
+  USER_NAME = user.first_name ? user.first_name           : 'Пользователь';
+  CHAT_ID   = USER_ID;
+
+  // message_id из параметров URL (передаётся через web_app url)
+  var params = new URLSearchParams(window.location.search);
+  MESSAGE_ID = params.get('message_id') || '';
+  // chat_id может прийти отдельно если нужен
+  if (params.get('chat_id')) CHAT_ID = params.get('chat_id');
+}
+
+// ─── HEIGHT FIX (iOS Safari + Telegram) ──────────────────────────────────────
+function fixH() {
+  var h = window.innerHeight;
+  var app = document.getElementById('app');
+  if (app) app.style.height = h + 'px';
+  var s = document.getElementById('succ');
+  if (s) s.style.height = h + 'px';
+}
+fixH();
+window.addEventListener('resize', fixH);
+window.addEventListener('orientationchange', function() { setTimeout(fixH, 300); });
+if (tg && tg.onEvent) {
+  tg.onEvent('viewportChanged', function() { setTimeout(fixH, 100); });
+}
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+var OBJ_HINTS  = [];
+var PROD_HINTS = [];
+var icnt = 0;
+var step = 1;
+var STEPS = [
+  { l: 'Шаг 1 из 3', t: '📍 Укажите объект' },
+  { l: 'Шаг 2 из 3', t: '🛒 Добавьте товары' },
+  { l: 'Шаг 3 из 3', t: '✅ Проверьте заказ'  }
+];
+
+// ─── LOAD HINTS FROM GOOGLE SHEETS ───────────────────────────────────────────
+function loadHints() {
+  // Публичный Google Sheets JSON API (таблица должна быть открыта на просмотр)
+  var url = 'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/gviz/tq?tqx=out:json&sheet=%D0%97%D0%B0%D0%BA%D0%B0%D0%B7%D1%8B';
+
+  fetch(url)
+    .then(function(r) { return r.text(); })
+    .then(function(txt) {
+      // Google возвращает JSONP-обёртку, вырезаем чистый JSON
+      var json = JSON.parse(txt.replace(/^[^(]+\(/, '').replace(/\);?\s*$/, ''));
+      var rows = (json.table && json.table.rows) || [];
+      var objSet  = new Set();
+      var prodSet = new Set();
+      rows.forEach(function(row) {
+        // Колонка B (индекс 1) — объект, колонка F (индекс 5) — товар
+        if (row.c && row.c[1] && row.c[1].v) objSet.add(row.c[1].v.toString().trim());
+        if (row.c && row.c[5] && row.c[5].v) prodSet.add(row.c[5].v.toString().trim());
+      });
+      OBJ_HINTS  = Array.from(objSet).sort();
+      PROD_HINTS = Array.from(prodSet).sort();
+      // Обновляем автокомплит объекта
+      rebindAc(document.getElementById('objInp'), document.getElementById('objDrop'), OBJ_HINTS);
+    })
+    .catch(function(e) {
+      console.warn('Hints load failed:', e);
+    })
+    .finally(function() {
+      startApp();
+    });
+}
+
+function startApp() {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display     = 'flex';
+  init();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function init() {
+  ac(document.getElementById('objInp'), document.getElementById('objDrop'), OBJ_HINTS);
+  document.getElementById('addBtn').addEventListener('click', addItem);
+  document.getElementById('btnNext').addEventListener('click', onNext);
+  document.getElementById('btnBack').addEventListener('click', onBack);
+  document.getElementById('btnNew').addEventListener('click', onNew);
+  showStep(1);
+  addItem();
+}
+
+var _acBindings = new Map();
+
+function rebindAc(inp, drop, list) {
+  _acBindings.set(inp, list);
+}
+
+function ac(inp, drop, list) {
+  _acBindings.set(inp, list);
+  function show(val) {
+    var src = _acBindings.get(inp) || list;
+    var q   = val.trim().toLowerCase();
+    var m   = (q ? src.filter(function(s){ return s.toLowerCase().includes(q); }) : src).slice(0, 30);
+    drop.innerHTML = '';
+    if (!m.length) { drop.classList.remove('open'); return; }
+    m.forEach(function(s) {
+      var d = document.createElement('div');
+      d.className = 'ditem';
+      d.textContent = s;
+      d.addEventListener('mousedown', function(e){ e.preventDefault(); });
+      d.addEventListener('click', function(){
+        inp.value = s;
+        drop.classList.remove('open');
+        inp.classList.remove('herr');
+      });
+      drop.appendChild(d);
+    });
+    drop.classList.add('open');
+  }
+  inp.addEventListener('input',  function(){ show(inp.value); });
+  inp.addEventListener('focus',  function(){ show(inp.value); });
+  inp.addEventListener('blur',   function(){ setTimeout(function(){ drop.classList.remove('open'); }, 180); });
+}
+
+// ─── STEPS ────────────────────────────────────────────────────────────────────
+function showStep(n, dir) {
+  step = n;
+  for (var i = 1; i <= 3; i++) {
+    var d = document.getElementById('d' + i);
+    d.className = 'pdot';
+    if (i < n)      d.classList.add('done');
+    else if (i===n) d.classList.add('active');
+  }
+  document.getElementById('slbl').textContent = STEPS[n-1].l;
+  document.getElementById('stit').textContent = STEPS[n-1].t;
+
+  ['s1','s2','s3'].forEach(function(id) {
+    var el = document.getElementById(id);
+    el.style.display = 'none';
+    el.classList.remove('aright','aleft');
+  });
+  var body = document.getElementById('s' + n);
+  body.style.display = 'block';
+  if (dir) { void body.offsetWidth; body.classList.add(dir === 'f' ? 'aright' : 'aleft'); }
+
+  document.getElementById('btnBack').style.display = n > 1 ? 'flex' : 'none';
+
+  var btn = document.getElementById('btnNext');
+  btn.disabled = false; btn.className = 'bnx';
+  if (n === 3) { btn.textContent = '📤 Отправить заказ'; btn.classList.add('ok'); }
+  else           btn.textContent = 'Далее →';
+
+  body.scrollTop = 0;
+  fixH();
+
+  if (n === 1) {
+    setTimeout(function(){
+      var inp = document.getElementById('objInp');
+      if (inp) inp.focus();
+    }, 300);
+  }
+}
+
+function onNext() {
+  if (step === 1) {
+    var v = document.getElementById('objInp').value.trim();
+    if (!v) {
+      document.getElementById('objInp').classList.add('herr');
+      document.getElementById('objErr').classList.add('show');
+      return;
+    }
+    document.getElementById('objInp').classList.remove('herr');
+    document.getElementById('objErr').classList.remove('show');
+    showStep(2, 'f');
+    return;
+  }
+  if (step === 2) {
+    var items = collect();
+    if (!items || !items.length) return;
+    buildConfirm();
+    showStep(3, 'f');
+    return;
+  }
+  if (step === 3) {
+    var obj = document.getElementById('objInp').value.trim();
+    var its = collect();
+    if (!its || !its.length) { showStep(2); return; }
+
+    var btn = document.getElementById('btnNext');
+    btn.disabled = true;
+    btn.textContent = '⏳ Отправка...';
+
+    submit(obj, its, function() {
+      showSucc();
+    }, function() {
+      btn.textContent = '❌ Ошибка — повторить';
+      btn.className = 'bnx bad';
+      btn.disabled = false;
+      setTimeout(function(){
+        btn.textContent = '📤 Отправить заказ';
+        btn.className = 'bnx ok';
+      }, 3000);
+    });
+  }
+}
+
+function onBack() {
+  if (step > 1) showStep(step - 1, 'b');
+}
+
+// ─── ITEMS ────────────────────────────────────────────────────────────────────
+function addItem() {
+  icnt++;
+  var id  = icnt;
+  var div = document.createElement('div');
+  div.className = 'icard';
+  div.id = 'card' + id;
+  div.setAttribute('data-id', id);
+  div.innerHTML =
+    '<div class="irow">' +
+      '<div class="inwrap">' +
+        '<input type="text" id="n'+id+'" placeholder="Название товара" autocomplete="off">' +
+        '<div class="drop" id="pd'+id+'"></div>' +
+        '<div class="emsg" id="ne'+id+'">Укажите товар</div>' +
+      '</div>' +
+      '<div class="iqwrap">' +
+        '<input type="number" id="q'+id+'" value="1" min="1" inputmode="numeric">' +
+      '</div>' +
+      '<button class="rmbtn" onclick="rmItem('+id+')">×</button>' +
+    '</div>' +
+    '<div class="tcmt" onclick="togCmt('+id+')">' +
+      '<span class="ic" id="ic'+id+'">+</span>' +
+      '<span>Комментарий</span>' +
+    '</div>' +
+    '<div class="carea" id="ca'+id+'">' +
+      '<textarea id="c'+id+'" placeholder="Комментарий к товару..."></textarea>' +
+    '</div>';
+  document.getElementById('ilist').appendChild(div);
+
+  ac(document.getElementById('n'+id), document.getElementById('pd'+id), PROD_HINTS);
+  setupQ(id);
+
+  document.getElementById('n'+id).addEventListener('focus', function(){
+    var a = document.getElementById('anchor');
+    if (a) setTimeout(function(){ a.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, 100);
+  });
+  if (icnt > 1) {
+    setTimeout(function(){ div.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 100);
+  }
+}
+
+function rmItem(id) {
+  var el = document.getElementById('card' + id);
+  if (el) el.remove();
+  if (!document.getElementById('ilist').children.length) addItem();
+}
+
+function setupQ(id) {
+  var q = document.getElementById('q' + id);
+  if (!q) return;
+  q.addEventListener('keypress', function(e){ if (e.charCode < 48 || e.charCode > 57) e.preventDefault(); });
+  q.addEventListener('paste',    function(e){ e.preventDefault(); });
+  q.addEventListener('input',    function(){
+    this.value = this.value.replace(/[^0-9]/g, '');
+    if (this.value === '' || parseInt(this.value) < 1) this.value = 1;
+  });
+  q.addEventListener('blur', function(){
+    var v = parseInt(this.value);
+    if (!this.value.trim() || isNaN(v) || v < 1) this.value = 1;
+    this.classList.remove('herr');
+  });
+}
+
+function togCmt(id) {
+  var ca   = document.getElementById('ca' + id);
+  var ic   = document.getElementById('ic' + id);
+  var open = ca.classList.toggle('open');
+  ic.textContent = open ? '−' : '+';
+  if (open) setTimeout(function(){
+    var ta = document.getElementById('c' + id);
+    if (ta) ta.focus();
+  }, 100);
+}
+
+function collect() {
+  var cards = document.getElementById('ilist').querySelectorAll('.icard');
+  var items = [], ok = true;
+  cards.forEach(function(card) {
+    var id  = card.getAttribute('data-id');
+    var nEl = document.getElementById('n' + id);
+    var qEl = document.getElementById('q' + id);
+    var nEr = document.getElementById('ne' + id);
+    if (!nEl) return;
+    var nv = nEl.value.trim();
+    var qv = parseInt(qEl ? qEl.value : '1') || 1;
+    var cv = (document.getElementById('c' + id) || {}).value || '';
+    if (!nv) {
+      nEl.classList.add('herr');
+      if (nEr) nEr.classList.add('show');
+      ok = false;
+    } else {
+      nEl.classList.remove('herr');
+      if (nEr) nEr.classList.remove('show');
+      items.push({ name: nv, qty: Math.max(1, qv), comment: cv.trim() });
+    }
+  });
+  return ok ? items : null;
+}
+
+// ─── CONFIRM ──────────────────────────────────────────────────────────────────
+function buildConfirm() {
+  document.getElementById('cobj').textContent = document.getElementById('objInp').value.trim();
+  var cards = document.getElementById('ilist').querySelectorAll('.icard');
+  var cont  = document.getElementById('citems');
+  cont.innerHTML = '';
+  var idx = 0;
+  cards.forEach(function(card) {
+    var id  = card.getAttribute('data-id');
+    var nEl = document.getElementById('n' + id);
+    var qEl = document.getElementById('q' + id);
+    var cEl = document.getElementById('c' + id);
+    if (!nEl) return;
+    var nv = nEl.value.trim();
+    var qv = parseInt(qEl ? qEl.value : '1') || 1;
+    var cv = cEl ? cEl.value.trim() : '';
+    if (!nv) return;
+    idx++;
+    var row = document.createElement('div');
+    row.className = 'citem';
+    row.innerHTML =
+      '<div class="cnum">' + idx + '</div>' +
+      '<div style="flex:1">' +
+        '<div class="cname">' + esc(nv) + '</div>' +
+        (cv ? '<div class="ccmt">' + esc(cv) + '</div>' : '') +
+      '</div>' +
+      '<div class="cqty">' + qv + ' шт.</div>';
+    cont.appendChild(row);
+  });
+}
+
+// ─── SUBMIT ───────────────────────────────────────────────────────────────────
+function submit(obj, items, onOk, onErr) {
+  var payload = JSON.stringify({
+    action: 'order',
+    data: {
+      user_id:    USER_ID,
+      username:   USERNAME,
+      name:       USER_NAME,
+      chat_id:    CHAT_ID,
+      message_id: MESSAGE_ID,
+      object:     obj,
+      items:      items
+    }
+  });
+
+  fetch(GAS_URL, {
+    method:  'POST',
+    mode:    'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body:    payload
+  })
+  .then(function()  { onOk();  })
+  .catch(function() { onErr(); });
+}
+
+// ─── SUCCESS ──────────────────────────────────────────────────────────────────
+function showSucc() {
+  document.getElementById('succ').classList.add('show');
+  // Закрываем WebApp через 3 секунды (опционально)
+  // setTimeout(function(){ if (tg) tg.close(); }, 3000);
+}
+
+function onNew() {
+  document.getElementById('succ').classList.remove('show');
+  document.getElementById('ilist').innerHTML = '';
+  document.getElementById('objInp').value = '';
+  icnt = 0;
+  showStep(1);
+  addItem();
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─── START ────────────────────────────────────────────────────────────────────
+loadHints();
+</script>
+</body>
+</html>
