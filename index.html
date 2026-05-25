@@ -736,10 +736,25 @@ function rmItem(id) {
 function setupQ(id) {
   var q = document.getElementById('q' + id);
   if (!q) return;
+  q._isDefault = true;  // флаг: значение дефолтное
+  q.addEventListener('focus', function(){
+    if (this._isDefault) {
+      var self = this;
+      setTimeout(function(){ self.select(); }, 0);
+    }
+  });
   q.addEventListener('keypress', function(e){ if (e.charCode < 48 || e.charCode > 57) e.preventDefault(); });
   q.addEventListener('paste',    function(e){ e.preventDefault(); });
-  q.addEventListener('input',    function(){ this.value = this.value.replace(/[^0-9]/g,''); if (this.value===''||parseInt(this.value)<1) this.value=1; });
-  q.addEventListener('blur',     function(){ var v=parseInt(this.value); if(!this.value.trim()||isNaN(v)||v<1) this.value=1; this.classList.remove('herr'); });
+  q.addEventListener('input',    function(){
+    this.value = this.value.replace(/[^0-9]/g,'');
+    if (this.value===''||parseInt(this.value)<1) this.value=1;
+    this._isDefault = false;  // пользователь что-то ввёл — флаг снимаем
+  });
+  q.addEventListener('blur', function(){
+    var v=parseInt(this.value);
+    if(!this.value.trim()||isNaN(v)||v<1){ this.value=1; this._isDefault=true; }
+    this.classList.remove('herr');
+  });
 }
 
 function togCmt(id) {
