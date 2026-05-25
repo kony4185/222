@@ -455,21 +455,18 @@ async function processReceipt() {
   document.getElementById('proc-overlay').classList.add('show');
 
   try {
-    // Upload file to GAS (which saves to Drive) and get back Gemini result
     const base64 = await fileToBase64(receiptFile);
-    const resp   = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action:   'process_receipt',
-        user_id:  USER_ID,
-        name:     NAME,
-        object:   currentObj.name,
-        file_b64: base64,
-        file_name: receiptFile.name,
-        mime_type: receiptFile.type || 'image/jpeg'
-      })
-    });
+    const payload = {
+      action:    'process_receipt',
+      user_id:   USER_ID,
+      name:      NAME,
+      object:    currentObj.name,
+      file_b64:  base64,
+      file_name: receiptFile.name,
+      mime_type: receiptFile.type || 'image/jpeg'
+    };
+    const url  = GAS_URL + '?payload=' + encodeURIComponent(JSON.stringify(payload));
+    const resp = await fetch(url);
     const data = await resp.json();
 
     if (data.ok && data.receipt) {
@@ -592,21 +589,19 @@ async function confirmPayment() {
   document.getElementById('confirm-btn').textContent = 'Сохранение...';
 
   try {
-    const r = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action:          'confirm_purchase',
-        user_id:         USER_ID,
-        username:        USERNAME,
-        name:            NAME,
-        object:          obj.name,
-        object_address:  obj.address,
-        confirmed_rows:  confirmedRows,
-        extra_items:     confirmedExtra
-      })
-    });
-    const d = await r.json();
+    const payload = {
+      action:          'confirm_purchase',
+      user_id:         USER_ID,
+      username:        USERNAME,
+      name:            NAME,
+      object:          obj.name,
+      object_address:  obj.address,
+      confirmed_rows:  confirmedRows,
+      extra_items:     confirmedExtra
+    };
+    const url = GAS_URL + '?payload=' + encodeURIComponent(JSON.stringify(payload));
+    const r   = await fetch(url);
+    const d   = await r.json();
     if (d.ok) {
       const cnt = confirmedRows.length + confirmedExtra.length;
       document.getElementById('succ-sub-text').textContent = `Подтверждено ${cnt} поз. по объекту «${obj.name}»`;
