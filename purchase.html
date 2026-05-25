@@ -465,8 +465,11 @@ async function processReceipt() {
       file_name: receiptFile.name,
       mime_type: receiptFile.type || 'image/jpeg'
     };
-    const url  = GAS_URL + '?payload=' + encodeURIComponent(JSON.stringify(payload));
-    const resp = await fetch(url);
+    const resp = await fetch(GAS_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload)
+    });
     const data = await resp.json();
 
     if (data.ok && data.receipt) {
