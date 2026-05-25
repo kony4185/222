@@ -45,76 +45,42 @@ html, body {
   margin: 0 auto;
 }
 
-/* --- Progress --- */
-.prog {
-  flex-shrink: 0;
-  padding: 14px 20px 0;
-  display: flex;
-  gap: 8px;
-}
-.pdot {
-  flex: 1; height: 4px;
-  border-radius: 2px;
-  background: var(--bg3);
-  transition: background 0.3s;
-}
+.prog { flex-shrink: 0; padding: 14px 20px 0; display: flex; gap: 8px; }
+.pdot { flex: 1; height: 4px; border-radius: 2px; background: var(--bg3); transition: background 0.3s; }
 .pdot.active { background: var(--accent); }
 .pdot.done   { background: var(--green); }
 
-/* --- Header --- */
-.shdr {
-  flex-shrink: 0;
-  padding: 14px 20px 8px;
-}
-.slbl {
-  font-size: 12px; font-weight: 600;
-  color: var(--hint); text-transform: uppercase;
-  letter-spacing: 0.8px; margin-bottom: 4px;
-}
+.shdr { flex-shrink: 0; padding: 14px 20px 8px; }
+.slbl { font-size: 12px; font-weight: 600; color: var(--hint); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
 .stitle { font-size: 22px; font-weight: 700; line-height: 1.2; }
 
-/* --- Body --- */
 .sbody {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  flex: 1; overflow-y: auto; overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   padding: 14px 20px;
-  overscroll-behavior: contain;
-  min-height: 0;
+  overscroll-behavior: contain; min-height: 0;
 }
 .sbody::-webkit-scrollbar { display: none; }
 
-/* --- Bottom bar --- */
 .bbar {
-  flex-shrink: 0;
-  padding: 12px 20px;
+  flex-shrink: 0; padding: 12px 20px;
   padding-bottom: max(16px, calc(env(safe-area-inset-bottom, 0px) + 12px));
-  background: var(--bg);
-  border-top: 1px solid var(--border);
-  display: flex;
-  gap: 12px;
+  background: var(--bg); border-top: 1px solid var(--border);
+  display: flex; gap: 12px;
 }
 .bbk {
-  width: 54px; height: 56px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg2); color: var(--text);
-  font-size: 22px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+  width: 54px; height: 56px; border: 1.5px solid var(--border);
+  border-radius: var(--radius); background: var(--bg2); color: var(--text);
+  font-size: 22px; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0;
   -webkit-appearance: none; appearance: none;
 }
 .bbk:active { opacity: 0.6; }
-
 .bnx {
-  flex: 1; height: 56px;
-  border: none; border-radius: var(--radius);
+  flex: 1; height: 56px; border: none; border-radius: var(--radius);
   background: var(--accent); color: var(--atxt);
-  font-size: 17px; font-weight: 600;
-  cursor: pointer; font-family: inherit;
-  letter-spacing: 0.2px;
-  transition: opacity 0.15s;
+  font-size: 17px; font-weight: 600; cursor: pointer; font-family: inherit;
+  letter-spacing: 0.2px; transition: opacity 0.15s;
   box-shadow: 0 4px 14px rgba(51,144,236,0.35);
   -webkit-appearance: none; appearance: none;
 }
@@ -123,19 +89,14 @@ html, body {
 .bnx.ok  { background: var(--green); box-shadow: 0 4px 14px rgba(52,199,89,0.35); }
 .bnx.bad { background: var(--danger); box-shadow: none; }
 
-/* --- Fields --- */
 .field { position: relative; margin-bottom: 14px; }
+.field-label { font-size: 12px; font-weight: 600; color: var(--hint); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; padding-left: 2px; }
 
-input[type="text"],
-input[type="number"],
-textarea {
-  width: 100%;
-  padding: 15px 16px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
+input[type="text"], input[type="number"], textarea {
+  width: 100%; padding: 15px 16px;
+  border: 1.5px solid var(--border); border-radius: var(--radius);
   background: var(--bg2); color: var(--text);
-  font-size: 16px; font-family: inherit;
-  outline: none;
+  font-size: 16px; font-family: inherit; outline: none;
   -webkit-appearance: none; appearance: none;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
@@ -157,106 +118,146 @@ input.herr, textarea.herr {
 .emsg { color: var(--danger); font-size: 13px; margin-top: 6px; margin-left: 4px; display: none; }
 .emsg.show { display: block; }
 
-/* --- Dropdown --- */
+/* Static text (readonly object fields) */
+.static-field {
+  width: 100%; padding: 15px 16px;
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  background: var(--bg2); color: var(--text);
+  font-size: 16px; font-family: inherit;
+  min-height: 52px; line-height: 1.4;
+}
+.static-field.empty { color: var(--hint); font-style: italic; }
+
 .drop {
   position: absolute; top: calc(100% + 6px); left: 0; right: 0;
-  background: var(--bg);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.12);
-  z-index: 300;
-  max-height: 200px; overflow-y: auto;
-  display: none;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--radius); box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+  z-index: 300; max-height: 200px; overflow-y: auto; display: none;
 }
 .drop.open { display: block; }
-.ditem {
-  padding: 14px 16px; font-size: 16px;
-  border-bottom: 1px solid var(--border); cursor: pointer;
-}
+.ditem { padding: 14px 16px; font-size: 16px; border-bottom: 1px solid var(--border); cursor: pointer; }
 .ditem:last-child { border-bottom: none; }
 .ditem:active { background: var(--bg2); }
 
-/* --- Item cards --- */
+/* Object extra fields */
+.obj-extra {
+  background: var(--bg2); border-radius: var(--radius);
+  border: 1.5px solid var(--border); padding: 14px; margin-top: 4px; margin-bottom: 14px;
+}
+.obj-extra-title {
+  font-size: 12px; font-weight: 600; color: var(--hint);
+  text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px;
+}
+.obj-extra .field { margin-bottom: 10px; }
+.obj-extra .field:last-child { margin-bottom: 0; }
+.new-badge {
+  display: inline-block; background: rgba(51,144,236,0.12); color: var(--accent);
+  font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+  margin-left: 8px; vertical-align: middle; letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+/* Items */
 .icard {
-  background: var(--bg2);
-  border-radius: var(--radius);
-  border: 1.5px solid var(--border);
-  padding: 14px; margin-bottom: 12px;
+  background: var(--bg2); border-radius: var(--radius);
+  border: 1.5px solid var(--border); padding: 14px; margin-bottom: 12px;
 }
 .irow { display: flex; gap: 10px; align-items: flex-start; }
 .inwrap { flex: 1; position: relative; }
 .iqwrap { width: 80px; flex-shrink: 0; }
 .rmbtn {
-  width: 38px; height: 38px;
-  background: none; border: none;
-  color: var(--danger); font-size: 26px;
-  cursor: pointer; border-radius: 10px;
+  width: 38px; height: 38px; background: none; border: none;
+  color: var(--danger); font-size: 26px; cursor: pointer; border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
-  margin-top: 6px; flex-shrink: 0; opacity: 0.75;
-  -webkit-appearance: none;
+  margin-top: 6px; flex-shrink: 0; opacity: 0.75; -webkit-appearance: none;
 }
 .rmbtn:active { opacity: 1; background: rgba(229,57,53,0.08); }
-
 .tcmt {
-  display: inline-flex; align-items: center; gap: 8px;
-  margin-top: 10px; color: var(--accent); font-size: 14px;
-  cursor: pointer; user-select: none; font-weight: 500;
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 10px;
+  color: var(--accent); font-size: 14px; cursor: pointer; user-select: none; font-weight: 500;
 }
 .tcmt .ic {
-  width: 22px; height: 22px; border-radius: 50%;
-  background: var(--accent); color: var(--atxt);
-  font-size: 16px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+  width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+  color: var(--atxt); font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .carea { margin-top: 10px; display: none; }
 .carea.open { display: block; }
-
 .badd {
   width: 100%; padding: 15px;
-  border: 2px dashed rgba(51,144,236,0.4);
-  border-radius: var(--radius);
-  background: rgba(51,144,236,0.04);
-  color: var(--accent); font-size: 16px; font-weight: 600;
-  cursor: pointer; margin-bottom: 6px; font-family: inherit;
-  -webkit-appearance: none;
+  border: 2px dashed rgba(51,144,236,0.4); border-radius: var(--radius);
+  background: rgba(51,144,236,0.04); color: var(--accent);
+  font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 6px;
+  font-family: inherit; -webkit-appearance: none;
 }
 .badd:active { opacity: 0.7; }
 #anchor { height: 1px; visibility: hidden; pointer-events: none; }
 
-/* --- Confirm --- */
+/* Priority selector */
+.priority-wrap { margin-bottom: 14px; }
+.priority-label { font-size: 12px; font-weight: 600; color: var(--hint); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; padding-left: 2px; }
+.priority-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.prio-btn {
+  padding: 13px 8px; border: 1.5px solid var(--border);
+  border-radius: var(--radius); background: var(--bg2);
+  color: var(--text); font-size: 14px; font-weight: 600;
+  cursor: pointer; text-align: center; font-family: inherit;
+  transition: all 0.15s; -webkit-appearance: none;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.prio-btn .pico { font-size: 20px; }
+.prio-btn:active { opacity: 0.7; }
+.prio-btn.sel-low    { border-color: var(--green);  background: rgba(52,199,89,0.1);  color: #1a8c3a; }
+.prio-btn.sel-medium { border-color: #ff9f0a;       background: rgba(255,159,10,0.1); color: #b36800; }
+.prio-btn.sel-high   { border-color: var(--danger); background: rgba(229,57,53,0.1);  color: var(--danger); }
+
+/* Confirm */
 .cblock {
   background: var(--bg2); border-radius: var(--radius);
   border: 1.5px solid var(--border); padding: 16px; margin-bottom: 14px;
 }
-.cstitle {
-  font-size: 12px; font-weight: 600; color: var(--hint);
-  text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 10px;
-}
+.cstitle { font-size: 12px; font-weight: 600; color: var(--hint); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 10px; }
 .coval { font-size: 18px; font-weight: 700; line-height: 1.3; }
-.citem {
-  display: flex; align-items: flex-start;
-  gap: 12px; padding: 10px 0;
-  border-bottom: 1px solid var(--border);
-}
+.coval-sub { font-size: 14px; color: var(--hint); margin-top: 4px; line-height: 1.4; }
+.citem { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
 .citem:last-child { border-bottom: none; padding-bottom: 0; }
 .cnum {
-  width: 26px; height: 26px; border-radius: 50%;
-  background: var(--accent); color: var(--atxt);
-  font-size: 12px; font-weight: 700;
+  width: 26px; height: 26px; border-radius: 50%; background: var(--accent);
+  color: var(--atxt); font-size: 12px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; margin-top: 1px;
 }
 .cname { flex: 1; font-size: 16px; font-weight: 600; line-height: 1.3; }
 .cqty  { font-size: 15px; color: var(--hint); flex-shrink: 0; font-weight: 500; }
 .ccmt  { font-size: 13px; color: var(--hint); margin-top: 3px; }
+.cprio {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 20px;
+  font-size: 14px; font-weight: 700; margin-top: 2px;
+}
+.cprio.low    { background: rgba(52,199,89,0.12);  color: #1a8c3a; }
+.cprio.medium { background: rgba(255,159,10,0.12); color: #b36800; }
+.cprio.high   { background: rgba(229,57,53,0.12);  color: var(--danger); }
 
-/* --- Success screen --- */
+/* Loading */
+#loading {
+  display: flex; position: fixed; inset: 0;
+  flex-direction: column; align-items: center; justify-content: center;
+  background: var(--bg); z-index: 1000;
+}
+.spin {
+  width: 40px; height: 40px; border: 3px solid var(--bg3);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin 0.7s linear infinite; margin-bottom: 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.ldtxt { color: var(--hint); font-size: 15px; }
+
+/* Success */
 #succ {
   display: none; position: fixed; inset: 0;
   flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; padding: 40px 24px;
-  background: var(--bg); z-index: 999;
+  text-align: center; padding: 40px 24px; background: var(--bg); z-index: 999;
 }
 #succ.show { display: flex; }
 .sico  { font-size: 72px; margin-bottom: 20px; }
@@ -264,40 +265,14 @@ input.herr, textarea.herr {
 .ssub  { font-size: 16px; color: var(--hint); margin-bottom: 36px; line-height: 1.5; }
 .bnew {
   padding: 17px 36px; border: none; border-radius: var(--radius);
-  background: var(--accent); color: var(--atxt);
-  font-size: 17px; font-weight: 600;
-  cursor: pointer; font-family: inherit;
-  box-shadow: 0 4px 18px rgba(51,144,236,0.35);
+  background: var(--accent); color: var(--atxt); font-size: 17px; font-weight: 600;
+  cursor: pointer; font-family: inherit; box-shadow: 0 4px 18px rgba(51,144,236,0.35);
   -webkit-appearance: none;
 }
 .bnew:active { opacity: 0.85; }
 
-/* --- Loading screen --- */
-#loading {
-  display: flex; position: fixed; inset: 0;
-  flex-direction: column; align-items: center; justify-content: center;
-  background: var(--bg); z-index: 1000;
-}
-.spin {
-  width: 40px; height: 40px;
-  border: 3px solid var(--bg3);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  margin-bottom: 16px;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.ldtxt { color: var(--hint); font-size: 15px; }
-
-/* --- Animations --- */
-@keyframes sRight {
-  from { opacity: 0; transform: translateX(28px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-@keyframes sLeft {
-  from { opacity: 0; transform: translateX(-28px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
+@keyframes sRight { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes sLeft  { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: translateX(0); } }
 .aright { animation: sRight 0.22s ease; }
 .aleft  { animation: sLeft  0.22s ease; }
 </style>
@@ -314,30 +289,72 @@ input.herr, textarea.herr {
     <div class="pdot" id="d1"></div>
     <div class="pdot" id="d2"></div>
     <div class="pdot" id="d3"></div>
+    <div class="pdot" id="d4"></div>
   </div>
   <div class="shdr">
     <div class="slbl" id="slbl"></div>
     <div class="stitle" id="stit"></div>
   </div>
 
+  <!-- Шаг 1: Объект -->
   <div id="s1" class="sbody" style="display:none">
     <div class="field">
       <input type="text" id="objInp" class="binp" placeholder="Например: ул. Ленина 42" autocomplete="off">
       <div class="drop" id="objDrop"></div>
       <div class="emsg" id="objErr">Укажите объект</div>
     </div>
+    <div id="objExtra" class="obj-extra" style="display:none">
+      <div class="obj-extra-title" id="objExtraTitle">Данные объекта</div>
+      <div class="field">
+        <div class="field-label">Адрес</div>
+        <div id="objAddrStatic" class="static-field" style="display:none"></div>
+        <input type="text" id="objAddr" placeholder="Адрес объекта" autocomplete="off" style="display:none">
+      </div>
+      <div class="field">
+        <div class="field-label">Комментарий</div>
+        <div id="objCmtStatic" class="static-field" style="display:none"></div>
+        <textarea id="objCmt" placeholder="Дополнительная информация об объекте..." style="display:none"></textarea>
+      </div>
+    </div>
   </div>
 
+  <!-- Шаг 2: Товары -->
   <div id="s2" class="sbody" style="display:none">
     <div id="ilist"></div>
     <button class="badd" id="addBtn">＋ Добавить товар</button>
     <div id="anchor"></div>
   </div>
 
+  <!-- Шаг 3: Приоритет -->
   <div id="s3" class="sbody" style="display:none">
+    <div class="priority-wrap">
+      <div class="priority-label">Выберите приоритет заказа</div>
+      <div class="priority-grid">
+        <button class="prio-btn" id="prio-low"    onclick="setPrio('low')">
+          <span class="pico">🟢</span>Низкий
+        </button>
+        <button class="prio-btn" id="prio-medium" onclick="setPrio('medium')">
+          <span class="pico">🟡</span>Средний
+        </button>
+        <button class="prio-btn" id="prio-high"   onclick="setPrio('high')">
+          <span class="pico">🔴</span>Высокий
+        </button>
+      </div>
+      <div class="emsg" id="prioErr" style="margin-top:10px">Выберите приоритет</div>
+    </div>
+  </div>
+
+  <!-- Шаг 4: Подтверждение -->
+  <div id="s4" class="sbody" style="display:none">
     <div class="cblock">
       <div class="cstitle">📦 Объект</div>
       <div class="coval" id="cobj"></div>
+      <div class="coval-sub" id="cobjAddr"></div>
+      <div class="coval-sub" id="cobjCmt"></div>
+    </div>
+    <div class="cblock">
+      <div class="cstitle">🔥 Приоритет</div>
+      <div id="cprioWrap"></div>
     </div>
     <div class="cblock">
       <div class="cstitle">🛒 Товары</div>
@@ -359,33 +376,28 @@ input.herr, textarea.herr {
 </div>
 
 <script>
-// ─── CONFIG ───────────────────────────────────────────────────────────────────
-// Замените на ваш реальный токен и ID таблицы
-var GAS_URL        = 'https://script.google.com/macros/s/AKfycbx8pvE4OPiDjYPG0adZuGzqss5x08rr32IsaXTgIBj3ras_VyrS35cQDd8pJo9Ff_P-gQ/exec';
-var BOT_TOKEN      = '22';          // ← вставьте ваш реальный токен
-var SPREADSHEET_ID = '1ix9Ce6wTuNMBZyaFBIoBmVrNDn3A2J1JT9tbZ_UD5f8';
-// ─────────────────────────────────────────────────────────────────────────────
-
-// Prevent multi-touch zoom
+// ─── PREVENT ZOOM ─────────────────────────────────────────────
 document.addEventListener('gesturestart',  function(e){ e.preventDefault(); }, { passive: false });
 document.addEventListener('gesturechange', function(e){ e.preventDefault(); }, { passive: false });
 document.addEventListener('gestureend',    function(e){ e.preventDefault(); }, { passive: false });
 document.addEventListener('touchmove', function(e){ if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
-// ─── TELEGRAM WEBAPP INIT ────────────────────────────────────────────────────
+// ─── TELEGRAM WEBAPP ──────────────────────────────────────────
 var tg = window.Telegram && window.Telegram.WebApp;
 
-var USER_ID    = '';
-var USERNAME   = '';
-var USER_NAME  = 'Пользователь';
-var CHAT_ID    = '';
-var MESSAGE_ID = '';
+// Читаем параметры из URL (gas_url передаётся из кнопки Telegram)
+var urlParams  = new URLSearchParams(window.location.search);
+var GAS_URL    = decodeURIComponent(urlParams.get('gas_url') || '');
+var USER_ID    = urlParams.get('user_id')    || '';
+var USERNAME   = urlParams.get('username')   || '';
+var USER_NAME  = decodeURIComponent(urlParams.get('name') || 'Пользователь');
+var CHAT_ID    = urlParams.get('chat_id')    || USER_ID;
+var MESSAGE_ID = urlParams.get('message_id') || '';
 
 if (tg) {
   tg.ready();
   tg.expand();
 
-  // Цвета из темы Telegram
   if (tg.themeParams) {
     var tp = tg.themeParams;
     if (tp.bg_color)           document.documentElement.style.setProperty('--bg',     tp.bg_color);
@@ -396,25 +408,18 @@ if (tg) {
     if (tp.button_text_color)  document.documentElement.style.setProperty('--atxt',   tp.button_text_color);
   }
 
-  // Данные пользователя из initDataUnsafe
+  // Если данные пришли из Telegram WebApp, перезаписываем
   var initData = tg.initDataUnsafe || {};
-  var user = initData.user || {};
-
-  USER_ID   = user.id         ? user.id.toString()       : '';
-  USERNAME  = user.username   ? user.username             : '';
-  USER_NAME = user.first_name ? user.first_name           : 'Пользователь';
-  CHAT_ID   = USER_ID;
-
-  // message_id из параметров URL (передаётся через web_app url)
-  var params = new URLSearchParams(window.location.search);
-  MESSAGE_ID = params.get('message_id') || '';
-  // chat_id может прийти отдельно если нужен
-  if (params.get('chat_id')) CHAT_ID = params.get('chat_id');
+  var tgUser   = initData.user || {};
+  if (tgUser.id)         USER_ID   = tgUser.id.toString();
+  if (tgUser.username)   USERNAME  = tgUser.username;
+  if (tgUser.first_name) USER_NAME = tgUser.first_name;
+  if (USER_ID)           CHAT_ID   = USER_ID;
 }
 
-// ─── HEIGHT FIX (iOS Safari + Telegram) ──────────────────────────────────────
+// ─── HEIGHT FIX ───────────────────────────────────────────────
 function fixH() {
-  var h = window.innerHeight;
+  var h   = window.innerHeight;
   var app = document.getElementById('app');
   if (app) app.style.height = h + 'px';
   var s = document.getElementById('succ');
@@ -422,51 +427,39 @@ function fixH() {
 }
 fixH();
 window.addEventListener('resize', fixH);
-window.addEventListener('orientationchange', function() { setTimeout(fixH, 300); });
-if (tg && tg.onEvent) {
-  tg.onEvent('viewportChanged', function() { setTimeout(fixH, 100); });
-}
+window.addEventListener('orientationchange', function(){ setTimeout(fixH, 300); });
+if (tg && tg.onEvent) tg.onEvent('viewportChanged', function(){ setTimeout(fixH, 100); });
 
-// ─── STATE ────────────────────────────────────────────────────────────────────
-var OBJ_HINTS  = [];
-var PROD_HINTS = [];
-var icnt = 0;
-var step = 1;
+// ─── STATE ────────────────────────────────────────────────────
+var OBJ_HINTS  = [];   // массив объектов { name, address, comment }
+var PROD_HINTS = [];   // массив строк
+var icnt       = 0;
+var step       = 1;
+var priority   = '';   // 'low' | 'medium' | 'high'
+var isNewObj   = false;
+
 var STEPS = [
-  { l: 'Шаг 1 из 3', t: '📍 Укажите объект' },
-  { l: 'Шаг 2 из 3', t: '🛒 Добавьте товары' },
-  { l: 'Шаг 3 из 3', t: '✅ Проверьте заказ'  }
+  { l: 'Шаг 1 из 4', t: '📍 Укажите объект'  },
+  { l: 'Шаг 2 из 4', t: '🛒 Добавьте товары'  },
+  { l: 'Шаг 3 из 4', t: '🔥 Приоритет заказа' },
+  { l: 'Шаг 4 из 4', t: '✅ Проверьте заказ'  }
 ];
 
-// ─── LOAD HINTS FROM GOOGLE SHEETS ───────────────────────────────────────────
+// ─── LOAD HINTS ───────────────────────────────────────────────
 function loadHints() {
-  // Публичный Google Sheets JSON API (таблица должна быть открыта на просмотр)
-  var url = 'https://docs.google.com/spreadsheets/d/' + SPREADSHEET_ID + '/gviz/tq?tqx=out:json&sheet=%D0%97%D0%B0%D0%BA%D0%B0%D0%B7%D1%8B';
-
-  fetch(url)
-    .then(function(r) { return r.text(); })
-    .then(function(txt) {
-      // Google возвращает JSONP-обёртку, вырезаем чистый JSON
-      var json = JSON.parse(txt.replace(/^[^(]+\(/, '').replace(/\);?\s*$/, ''));
-      var rows = (json.table && json.table.rows) || [];
-      var objSet  = new Set();
-      var prodSet = new Set();
-      rows.forEach(function(row) {
-        // Колонка B (индекс 1) — объект, колонка F (индекс 5) — товар
-        if (row.c && row.c[1] && row.c[1].v) objSet.add(row.c[1].v.toString().trim());
-        if (row.c && row.c[5] && row.c[5].v) prodSet.add(row.c[5].v.toString().trim());
-      });
-      OBJ_HINTS  = Array.from(objSet).sort();
-      PROD_HINTS = Array.from(prodSet).sort();
-      // Обновляем автокомплит объекта
-      rebindAc(document.getElementById('objInp'), document.getElementById('objDrop'), OBJ_HINTS);
+  if (!GAS_URL) {
+    console.warn('GAS_URL не задан. Подсказки не загружены.');
+    startApp();
+    return;
+  }
+  fetch(GAS_URL + '?action=hints')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      OBJ_HINTS  = data.objects  || [];
+      PROD_HINTS = data.products || [];
     })
-    .catch(function(e) {
-      console.warn('Hints load failed:', e);
-    })
-    .finally(function() {
-      startApp();
-    });
+    .catch(function(e){ console.warn('Hints load failed:', e); })
+    .finally(function(){ startApp(); });
 }
 
 function startApp() {
@@ -475,9 +468,9 @@ function startApp() {
   init();
 }
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
+// ─── INIT ─────────────────────────────────────────────────────
 function init() {
-  ac(document.getElementById('objInp'), document.getElementById('objDrop'), OBJ_HINTS);
+  acObj(document.getElementById('objInp'), document.getElementById('objDrop'));
   document.getElementById('addBtn').addEventListener('click', addItem);
   document.getElementById('btnNext').addEventListener('click', onNext);
   document.getElementById('btnBack').addEventListener('click', onBack);
@@ -486,43 +479,11 @@ function init() {
   addItem();
 }
 
-var _acBindings = new Map();
-
-function rebindAc(inp, drop, list) {
-  _acBindings.set(inp, list);
-}
-
-function ac(inp, drop, list) {
-  _acBindings.set(inp, list);
-  function show(val) {
-    var src = _acBindings.get(inp) || list;
-    var q   = val.trim().toLowerCase();
-    var m   = (q ? src.filter(function(s){ return s.toLowerCase().includes(q); }) : src).slice(0, 30);
-    drop.innerHTML = '';
-    if (!m.length) { drop.classList.remove('open'); return; }
-    m.forEach(function(s) {
-      var d = document.createElement('div');
-      d.className = 'ditem';
-      d.textContent = s;
-      d.addEventListener('mousedown', function(e){ e.preventDefault(); });
-      d.addEventListener('click', function(){
-        inp.value = s;
-        drop.classList.remove('open');
-        inp.classList.remove('herr');
-      });
-      drop.appendChild(d);
-    });
-    drop.classList.add('open');
-  }
-  inp.addEventListener('input',  function(){ show(inp.value); });
-  inp.addEventListener('focus',  function(){ show(inp.value); });
-  inp.addEventListener('blur',   function(){ setTimeout(function(){ drop.classList.remove('open'); }, 180); });
-}
-
-// ─── STEPS ────────────────────────────────────────────────────────────────────
+// ─── STEPS ────────────────────────────────────────────────────
 function showStep(n, dir) {
   step = n;
-  for (var i = 1; i <= 3; i++) {
+  var total = 4;
+  for (var i = 1; i <= total; i++) {
     var d = document.getElementById('d' + i);
     d.className = 'pdot';
     if (i < n)      d.classList.add('done');
@@ -531,34 +492,30 @@ function showStep(n, dir) {
   document.getElementById('slbl').textContent = STEPS[n-1].l;
   document.getElementById('stit').textContent = STEPS[n-1].t;
 
-  ['s1','s2','s3'].forEach(function(id) {
+  ['s1','s2','s3','s4'].forEach(function(id){
     var el = document.getElementById(id);
     el.style.display = 'none';
     el.classList.remove('aright','aleft');
   });
   var body = document.getElementById('s' + n);
   body.style.display = 'block';
-  if (dir) { void body.offsetWidth; body.classList.add(dir === 'f' ? 'aright' : 'aleft'); }
+  if (dir){ void body.offsetWidth; body.classList.add(dir==='f'?'aright':'aleft'); }
 
   document.getElementById('btnBack').style.display = n > 1 ? 'flex' : 'none';
 
   var btn = document.getElementById('btnNext');
   btn.disabled = false; btn.className = 'bnx';
-  if (n === 3) { btn.textContent = '📤 Отправить заказ'; btn.classList.add('ok'); }
-  else           btn.textContent = 'Далее →';
+  if (n === 4){ btn.textContent = '📤 Отправить заказ'; btn.classList.add('ok'); }
+  else         btn.textContent = 'Далее →';
 
   body.scrollTop = 0;
   fixH();
 
-  if (n === 1) {
-    setTimeout(function(){
-      var inp = document.getElementById('objInp');
-      if (inp) inp.focus();
-    }, 300);
-  }
+  if (n === 1) setTimeout(function(){ var inp = document.getElementById('objInp'); if(inp) inp.focus(); }, 300);
 }
 
 function onNext() {
+  // Шаг 1: проверяем объект
   if (step === 1) {
     var v = document.getElementById('objInp').value.trim();
     if (!v) {
@@ -568,35 +525,60 @@ function onNext() {
     }
     document.getElementById('objInp').classList.remove('herr');
     document.getElementById('objErr').classList.remove('show');
+
+    // Если новый — сохраняем объект в таблицу
+    if (isNewObj && GAS_URL) {
+      var addr = document.getElementById('objAddr').value.trim();
+      var cmt  = document.getElementById('objCmt').value.trim();
+      fetch(GAS_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'save_object', data: { name: v, address: addr, comment: cmt } })
+      }).catch(function(){});
+    }
+
     showStep(2, 'f');
     return;
   }
+
+  // Шаг 2: товары
   if (step === 2) {
     var items = collect();
     if (!items || !items.length) return;
-    buildConfirm();
     showStep(3, 'f');
     return;
   }
+
+  // Шаг 3: приоритет
   if (step === 3) {
-    var obj = document.getElementById('objInp').value.trim();
-    var its = collect();
-    if (!its || !its.length) { showStep(2); return; }
+    if (!priority) {
+      document.getElementById('prioErr').classList.add('show');
+      return;
+    }
+    document.getElementById('prioErr').classList.remove('show');
+    buildConfirm();
+    showStep(4, 'f');
+    return;
+  }
+
+  // Шаг 4: отправка
+  if (step === 4) {
+    var obj  = document.getElementById('objInp').value.trim();
+    var its  = collect();
+    if (!its || !its.length){ showStep(2); return; }
 
     var btn = document.getElementById('btnNext');
     btn.disabled = true;
     btn.textContent = '⏳ Отправка...';
 
-    submit(obj, its, function() {
+    var objData = getObjData();
+
+    submit(obj, objData, its, priority, function(){
       showSucc();
-    }, function() {
+    }, function(){
       btn.textContent = '❌ Ошибка — повторить';
-      btn.className = 'bnx bad';
-      btn.disabled = false;
-      setTimeout(function(){
-        btn.textContent = '📤 Отправить заказ';
-        btn.className = 'bnx ok';
-      }, 3000);
+      btn.className = 'bnx bad'; btn.disabled = false;
+      setTimeout(function(){ btn.textContent = '📤 Отправить заказ'; btn.className = 'bnx ok'; }, 3000);
     });
   }
 }
@@ -605,14 +587,116 @@ function onBack() {
   if (step > 1) showStep(step - 1, 'b');
 }
 
-// ─── ITEMS ────────────────────────────────────────────────────────────────────
+// ─── OBJECT AUTOCOMPLETE ──────────────────────────────────────
+function acObj(inp, drop) {
+  function getNames() { return OBJ_HINTS.map(function(o){ return o.name; }); }
+
+  function show(val) {
+    var q = val.trim().toLowerCase();
+    var names = getNames();
+    var m = (q ? names.filter(function(s){ return s.toLowerCase().includes(q); }) : names).slice(0, 30);
+    drop.innerHTML = '';
+    if (!m.length){ drop.classList.remove('open'); return; }
+    m.forEach(function(s){
+      var d = document.createElement('div');
+      d.className = 'ditem'; d.textContent = s;
+      d.addEventListener('mousedown', function(e){ e.preventDefault(); });
+      d.addEventListener('click', function(){
+        inp.value = s;
+        drop.classList.remove('open');
+        inp.classList.remove('herr');
+        fillObjExtra(s);
+      });
+      drop.appendChild(d);
+    });
+    drop.classList.add('open');
+  }
+
+  inp.addEventListener('input', function(){
+    show(inp.value);
+    checkObjNew(inp.value.trim());
+  });
+  inp.addEventListener('focus',  function(){ show(inp.value); });
+  inp.addEventListener('blur',   function(){ setTimeout(function(){ drop.classList.remove('open'); }, 180); });
+}
+
+function fillObjExtra(name) {
+  var obj = OBJ_HINTS.find(function(o){ return o.name === name; });
+  var extra = document.getElementById('objExtra');
+  extra.style.display = 'block';
+  isNewObj = false;
+
+  document.getElementById('objExtraTitle').innerHTML = 'Данные объекта';
+
+  var addrInp    = document.getElementById('objAddr');
+  var addrStatic = document.getElementById('objAddrStatic');
+  var cmtInp     = document.getElementById('objCmt');
+  var cmtStatic  = document.getElementById('objCmtStatic');
+
+  if (obj) {
+    // Существующий — статичный текст
+    addrInp.style.display    = 'none';
+    cmtInp.style.display     = 'none';
+    addrStatic.style.display = 'block';
+    cmtStatic.style.display  = 'block';
+    addrStatic.textContent   = obj.address || '';
+    cmtStatic.textContent    = obj.comment || '';
+    addrStatic.className     = 'static-field' + (obj.address ? '' : ' empty');
+    cmtStatic.className      = 'static-field' + (obj.comment ? '' : ' empty');
+    if (!obj.address) addrStatic.textContent = 'Не указан';
+    if (!obj.comment) cmtStatic.textContent  = 'Нет комментария';
+  } else {
+    // Новый объект — редактируемые поля
+    isNewObj = true;
+    document.getElementById('objExtraTitle').innerHTML =
+      'Данные объекта <span class="new-badge">Новый</span>';
+    addrStatic.style.display = 'none';
+    cmtStatic.style.display  = 'none';
+    addrInp.style.display    = 'block';
+    cmtInp.style.display     = 'block';
+    addrInp.value = '';
+    cmtInp.value  = '';
+  }
+}
+
+function checkObjNew(val) {
+  if (!val) {
+    document.getElementById('objExtra').style.display = 'none';
+    isNewObj = false;
+    return;
+  }
+  var exists = OBJ_HINTS.some(function(o){ return o.name.toLowerCase() === val.toLowerCase(); });
+  if (!exists) fillObjExtra(val); // покажет поля для нового
+}
+
+function getObjData() {
+  var name = document.getElementById('objInp').value.trim();
+  if (isNewObj) {
+    return {
+      address: document.getElementById('objAddr').value.trim(),
+      comment: document.getElementById('objCmt').value.trim()
+    };
+  }
+  var obj = OBJ_HINTS.find(function(o){ return o.name === name; });
+  return obj ? { address: obj.address || '', comment: obj.comment || '' } : { address: '', comment: '' };
+}
+
+// ─── PRIORITY ─────────────────────────────────────────────────
+function setPrio(val) {
+  priority = val;
+  ['low','medium','high'].forEach(function(p){
+    var btn = document.getElementById('prio-' + p);
+    btn.className = 'prio-btn' + (p === val ? ' sel-' + p : '');
+  });
+  document.getElementById('prioErr').classList.remove('show');
+}
+
+// ─── ITEMS ────────────────────────────────────────────────────
 function addItem() {
   icnt++;
   var id  = icnt;
   var div = document.createElement('div');
-  div.className = 'icard';
-  div.id = 'card' + id;
-  div.setAttribute('data-id', id);
+  div.className = 'icard'; div.id = 'card' + id; div.setAttribute('data-id', id);
   div.innerHTML =
     '<div class="irow">' +
       '<div class="inwrap">' +
@@ -626,24 +710,21 @@ function addItem() {
       '<button class="rmbtn" onclick="rmItem('+id+')">×</button>' +
     '</div>' +
     '<div class="tcmt" onclick="togCmt('+id+')">' +
-      '<span class="ic" id="ic'+id+'">+</span>' +
-      '<span>Комментарий</span>' +
+      '<span class="ic" id="ic'+id+'">+</span><span>Комментарий</span>' +
     '</div>' +
     '<div class="carea" id="ca'+id+'">' +
       '<textarea id="c'+id+'" placeholder="Комментарий к товару..."></textarea>' +
     '</div>';
   document.getElementById('ilist').appendChild(div);
 
-  ac(document.getElementById('n'+id), document.getElementById('pd'+id), PROD_HINTS);
+  acProd(document.getElementById('n'+id), document.getElementById('pd'+id));
   setupQ(id);
 
   document.getElementById('n'+id).addEventListener('focus', function(){
     var a = document.getElementById('anchor');
     if (a) setTimeout(function(){ a.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, 100);
   });
-  if (icnt > 1) {
-    setTimeout(function(){ div.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 100);
-  }
+  if (icnt > 1) setTimeout(function(){ div.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 100);
 }
 
 function rmItem(id) {
@@ -657,131 +738,137 @@ function setupQ(id) {
   if (!q) return;
   q.addEventListener('keypress', function(e){ if (e.charCode < 48 || e.charCode > 57) e.preventDefault(); });
   q.addEventListener('paste',    function(e){ e.preventDefault(); });
-  q.addEventListener('input',    function(){
-    this.value = this.value.replace(/[^0-9]/g, '');
-    if (this.value === '' || parseInt(this.value) < 1) this.value = 1;
-  });
-  q.addEventListener('blur', function(){
-    var v = parseInt(this.value);
-    if (!this.value.trim() || isNaN(v) || v < 1) this.value = 1;
-    this.classList.remove('herr');
-  });
+  q.addEventListener('input',    function(){ this.value = this.value.replace(/[^0-9]/g,''); if (this.value===''||parseInt(this.value)<1) this.value=1; });
+  q.addEventListener('blur',     function(){ var v=parseInt(this.value); if(!this.value.trim()||isNaN(v)||v<1) this.value=1; this.classList.remove('herr'); });
 }
 
 function togCmt(id) {
-  var ca   = document.getElementById('ca' + id);
-  var ic   = document.getElementById('ic' + id);
-  var open = ca.classList.toggle('open');
-  ic.textContent = open ? '−' : '+';
-  if (open) setTimeout(function(){
-    var ta = document.getElementById('c' + id);
-    if (ta) ta.focus();
-  }, 100);
+  var ca = document.getElementById('ca'+id); var ic = document.getElementById('ic'+id);
+  var open = ca.classList.toggle('open'); ic.textContent = open ? '−' : '+';
+  if (open) setTimeout(function(){ var ta=document.getElementById('c'+id); if(ta) ta.focus(); }, 100);
+}
+
+function acProd(inp, drop) {
+  function show(val) {
+    var q = val.trim().toLowerCase();
+    var m = (q ? PROD_HINTS.filter(function(s){ return s.toLowerCase().includes(q); }) : PROD_HINTS).slice(0, 30);
+    drop.innerHTML = '';
+    if (!m.length){ drop.classList.remove('open'); return; }
+    m.forEach(function(s){
+      var d = document.createElement('div');
+      d.className = 'ditem'; d.textContent = s;
+      d.addEventListener('mousedown', function(e){ e.preventDefault(); });
+      d.addEventListener('click', function(){ inp.value=s; drop.classList.remove('open'); inp.classList.remove('herr'); });
+      drop.appendChild(d);
+    });
+    drop.classList.add('open');
+  }
+  inp.addEventListener('input',  function(){ show(inp.value); });
+  inp.addEventListener('focus',  function(){ show(inp.value); });
+  inp.addEventListener('blur',   function(){ setTimeout(function(){ drop.classList.remove('open'); }, 180); });
 }
 
 function collect() {
   var cards = document.getElementById('ilist').querySelectorAll('.icard');
   var items = [], ok = true;
-  cards.forEach(function(card) {
+  cards.forEach(function(card){
     var id  = card.getAttribute('data-id');
-    var nEl = document.getElementById('n' + id);
-    var qEl = document.getElementById('q' + id);
-    var nEr = document.getElementById('ne' + id);
+    var nEl = document.getElementById('n'+id);
+    var qEl = document.getElementById('q'+id);
+    var nEr = document.getElementById('ne'+id);
     if (!nEl) return;
     var nv = nEl.value.trim();
     var qv = parseInt(qEl ? qEl.value : '1') || 1;
-    var cv = (document.getElementById('c' + id) || {}).value || '';
-    if (!nv) {
-      nEl.classList.add('herr');
-      if (nEr) nEr.classList.add('show');
-      ok = false;
-    } else {
-      nEl.classList.remove('herr');
-      if (nEr) nEr.classList.remove('show');
-      items.push({ name: nv, qty: Math.max(1, qv), comment: cv.trim() });
-    }
+    var cv = (document.getElementById('c'+id)||{}).value||'';
+    if (!nv){ nEl.classList.add('herr'); if(nEr) nEr.classList.add('show'); ok=false; }
+    else    { nEl.classList.remove('herr'); if(nEr) nEr.classList.remove('show'); items.push({ name:nv, qty:Math.max(1,qv), comment:cv.trim() }); }
   });
   return ok ? items : null;
 }
 
-// ─── CONFIRM ──────────────────────────────────────────────────────────────────
+// ─── CONFIRM ──────────────────────────────────────────────────
 function buildConfirm() {
-  document.getElementById('cobj').textContent = document.getElementById('objInp').value.trim();
+  var objName = document.getElementById('objInp').value.trim();
+  var objData = getObjData();
+  var prioMap = { low: { label: 'Низкий', cls: 'low', ico: '🟢' }, medium: { label: 'Средний', cls: 'medium', ico: '🟡' }, high: { label: 'Высокий', cls: 'high', ico: '🔴' } };
+  var p = prioMap[priority] || { label: '', cls: '', ico: '' };
+
+  document.getElementById('cobj').textContent = objName;
+  var addrEl = document.getElementById('cobjAddr');
+  var cmtEl  = document.getElementById('cobjCmt');
+  addrEl.textContent = objData.address ? '📍 ' + objData.address : '';
+  cmtEl.textContent  = objData.comment ? '💬 ' + objData.comment : '';
+
+  document.getElementById('cprioWrap').innerHTML =
+    '<span class="cprio ' + p.cls + '">' + p.ico + ' ' + p.label + '</span>';
+
   var cards = document.getElementById('ilist').querySelectorAll('.icard');
   var cont  = document.getElementById('citems');
   cont.innerHTML = '';
   var idx = 0;
-  cards.forEach(function(card) {
+  cards.forEach(function(card){
     var id  = card.getAttribute('data-id');
-    var nEl = document.getElementById('n' + id);
-    var qEl = document.getElementById('q' + id);
-    var cEl = document.getElementById('c' + id);
+    var nEl = document.getElementById('n'+id);
+    var qEl = document.getElementById('q'+id);
+    var cEl = document.getElementById('c'+id);
     if (!nEl) return;
-    var nv = nEl.value.trim();
-    var qv = parseInt(qEl ? qEl.value : '1') || 1;
-    var cv = cEl ? cEl.value.trim() : '';
+    var nv = nEl.value.trim(); var qv = parseInt(qEl?qEl.value:'1')||1; var cv = cEl?cEl.value.trim():'';
     if (!nv) return;
     idx++;
     var row = document.createElement('div');
     row.className = 'citem';
-    row.innerHTML =
-      '<div class="cnum">' + idx + '</div>' +
-      '<div style="flex:1">' +
-        '<div class="cname">' + esc(nv) + '</div>' +
-        (cv ? '<div class="ccmt">' + esc(cv) + '</div>' : '') +
-      '</div>' +
-      '<div class="cqty">' + qv + ' шт.</div>';
+    row.innerHTML = '<div class="cnum">'+idx+'</div><div style="flex:1"><div class="cname">'+esc(nv)+'</div>'+(cv?'<div class="ccmt">'+esc(cv)+'</div>':'')+'</div><div class="cqty">'+qv+' шт.</div>';
     cont.appendChild(row);
   });
 }
 
-// ─── SUBMIT ───────────────────────────────────────────────────────────────────
-function submit(obj, items, onOk, onErr) {
-  var payload = JSON.stringify({
-    action: 'order',
-    data: {
-      user_id:    USER_ID,
-      username:   USERNAME,
-      name:       USER_NAME,
-      chat_id:    CHAT_ID,
-      message_id: MESSAGE_ID,
-      object:     obj,
-      items:      items
-    }
-  });
-
+// ─── SUBMIT ───────────────────────────────────────────────────
+function submit(obj, objData, items, prio, onOk, onErr) {
+  if (!GAS_URL) { onErr(); return; }
   fetch(GAS_URL, {
-    method:  'POST',
-    mode:    'no-cors',
+    method: 'POST', mode: 'no-cors',
     headers: { 'Content-Type': 'text/plain' },
-    body:    payload
-  })
-  .then(function()  { onOk();  })
-  .catch(function() { onErr(); });
+    body: JSON.stringify({
+      action: 'order',
+      data: {
+        user_id:        USER_ID,
+        username:       USERNAME,
+        name:           USER_NAME,
+        chat_id:        CHAT_ID,
+        message_id:     MESSAGE_ID,
+        object:         obj,
+        object_address: objData.address,
+        object_comment: objData.comment,
+        priority:       prio,
+        items:          items
+      }
+    })
+  }).then(function(){ onOk(); }).catch(function(){ onErr(); });
 }
 
-// ─── SUCCESS ──────────────────────────────────────────────────────────────────
+// ─── SUCCESS ──────────────────────────────────────────────────
 function showSucc() {
   document.getElementById('succ').classList.add('show');
-  // Закрываем WebApp через 3 секунды (опционально)
-  // setTimeout(function(){ if (tg) tg.close(); }, 3000);
 }
 
 function onNew() {
   document.getElementById('succ').classList.remove('show');
   document.getElementById('ilist').innerHTML = '';
   document.getElementById('objInp').value = '';
+  document.getElementById('objExtra').style.display = 'none';
+  priority = '';
+  isNewObj = false;
+  ['low','medium','high'].forEach(function(p){ document.getElementById('prio-'+p).className='prio-btn'; });
   icnt = 0;
   showStep(1);
   addItem();
 }
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
 function esc(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ─── START ────────────────────────────────────────────────────────────────────
+// ─── START ────────────────────────────────────────────────────
 loadHints();
 </script>
 </body>
