@@ -118,7 +118,6 @@ input.herr, textarea.herr {
 .emsg { color: var(--danger); font-size: 13px; margin-top: 6px; margin-left: 4px; display: none; }
 .emsg.show { display: block; }
 
-/* Static text (readonly object fields) */
 .static-field {
   width: 100%; padding: 15px 16px;
   border: 1.5px solid var(--border); border-radius: var(--radius);
@@ -139,7 +138,6 @@ input.herr, textarea.herr {
 .ditem:last-child { border-bottom: none; }
 .ditem:active { background: var(--bg2); }
 
-/* Object extra fields */
 .obj-extra {
   background: var(--bg2); border-radius: var(--radius);
   border: 1.5px solid var(--border); padding: 14px; margin-top: 4px; margin-bottom: 14px;
@@ -157,7 +155,6 @@ input.herr, textarea.herr {
   text-transform: uppercase;
 }
 
-/* Items */
 .icard {
   background: var(--bg2); border-radius: var(--radius);
   border: 1.5px solid var(--border); padding: 14px; margin-bottom: 12px;
@@ -193,7 +190,6 @@ input.herr, textarea.herr {
 .badd:active { opacity: 0.7; }
 #anchor { height: 1px; visibility: hidden; pointer-events: none; }
 
-/* Priority selector */
 .priority-wrap { margin-bottom: 14px; }
 .priority-label { font-size: 12px; font-weight: 600; color: var(--hint); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; padding-left: 2px; }
 .priority-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -211,7 +207,6 @@ input.herr, textarea.herr {
 .prio-btn.sel-medium { border-color: #ff9f0a;       background: rgba(255,159,10,0.1); color: #b36800; }
 .prio-btn.sel-high   { border-color: var(--danger); background: rgba(229,57,53,0.1);  color: var(--danger); }
 
-/* Confirm */
 .cblock {
   background: var(--bg2); border-radius: var(--radius);
   border: 1.5px solid var(--border); padding: 16px; margin-bottom: 14px;
@@ -238,6 +233,49 @@ input.herr, textarea.herr {
 .cprio.low    { background: rgba(52,199,89,0.12);  color: #1a8c3a; }
 .cprio.medium { background: rgba(255,159,10,0.12); color: #b36800; }
 .cprio.high   { background: rgba(229,57,53,0.12);  color: var(--danger); }
+
+/* ── PURCHASE (чек) ── */
+#purchase-screen {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 32px 24px; gap: 20px;
+  flex: 1;
+}
+.purchase-icon { font-size: 64px; margin-bottom: 4px; }
+.purchase-title { font-size: 22px; font-weight: 700; text-align: center; }
+.purchase-sub   { font-size: 15px; color: var(--hint); text-align: center; line-height: 1.5; margin-bottom: 8px; }
+.file-drop-zone {
+  width: 100%; padding: 32px 20px;
+  border: 2px dashed rgba(51,144,236,0.4); border-radius: var(--radius);
+  background: rgba(51,144,236,0.04); text-align: center;
+  cursor: pointer; transition: all 0.15s;
+}
+.file-drop-zone:active, .file-drop-zone.drag { border-color: var(--accent); background: rgba(51,144,236,0.1); }
+.file-drop-zone .fdi { font-size: 36px; margin-bottom: 10px; }
+.file-drop-zone .fdt { font-size: 15px; color: var(--accent); font-weight: 600; }
+.file-drop-zone .fds { font-size: 13px; color: var(--hint); margin-top: 4px; }
+#fileInput { display: none; }
+.file-preview {
+  width: 100%; background: var(--bg2); border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px; display: none;
+}
+.file-preview.show { display: flex; }
+.fp-icon { font-size: 32px; flex-shrink: 0; }
+.fp-name { flex: 1; font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fp-size { font-size: 13px; color: var(--hint); margin-top: 2px; }
+.fp-rm   { width: 32px; height: 32px; border: none; background: none; color: var(--danger); font-size: 22px; cursor: pointer; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.fp-rm:active { background: rgba(229,57,53,0.08); }
+
+/* ── ACCESS DENIED ── */
+#access-denied {
+  display: none; position: fixed; inset: 0;
+  flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 40px 24px; background: var(--bg); z-index: 998;
+}
+#access-denied.show { display: flex; }
+.ad-icon { font-size: 72px; margin-bottom: 20px; }
+.ad-title { font-size: 24px; font-weight: 700; margin-bottom: 10px; color: var(--danger); }
+.ad-sub   { font-size: 16px; color: var(--hint); line-height: 1.5; }
 
 /* Loading */
 #loading {
@@ -284,8 +322,15 @@ input.herr, textarea.herr {
   <div class="ldtxt">Загрузка...</div>
 </div>
 
+<!-- Доступ запрещён -->
+<div id="access-denied">
+  <div class="ad-icon">⛔</div>
+  <div class="ad-title">Доступ запрещён</div>
+  <div class="ad-sub">Ваш аккаунт зафиксирован.<br>Обратитесь к администратору для получения доступа.</div>
+</div>
+
 <div id="app" style="display:none">
-  <div class="prog">
+  <div class="prog" id="prog">
     <div class="pdot" id="d1"></div>
     <div class="pdot" id="d2"></div>
     <div class="pdot" id="d3"></div>
@@ -362,6 +407,29 @@ input.herr, textarea.herr {
     </div>
   </div>
 
+  <!-- Экран чека (purchase mode) -->
+  <div id="s-purchase" class="sbody" style="display:none">
+    <div id="purchase-screen">
+      <div class="purchase-icon">🧾</div>
+      <div class="purchase-title">Загрузить чек</div>
+      <div class="purchase-sub">Прикрепите фото или PDF чека для отправки в систему</div>
+      <div class="file-drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <div class="fdi">📎</div>
+        <div class="fdt">Выбрать файл</div>
+        <div class="fds">Фото (JPG, PNG) или PDF</div>
+      </div>
+      <input type="file" id="fileInput" accept="image/*,application/pdf">
+      <div class="file-preview" id="filePreview">
+        <div class="fp-icon" id="fpIcon">🖼</div>
+        <div style="flex:1;min-width:0">
+          <div class="fp-name" id="fpName"></div>
+          <div class="fp-size" id="fpSize"></div>
+        </div>
+        <button class="fp-rm" onclick="clearFile()">×</button>
+      </div>
+    </div>
+  </div>
+
   <div class="bbar">
     <button class="bbk" id="btnBack" style="display:none">←</button>
     <button class="bnx" id="btnNext">Далее →</button>
@@ -369,9 +437,9 @@ input.herr, textarea.herr {
 </div>
 
 <div id="succ">
-  <div class="sico">✅</div>
-  <div class="stit">Заказ отправлен!</div>
-  <div class="ssub">Детали заказа отправлены вам в чат</div>
+  <div class="sico" id="succIco">✅</div>
+  <div class="stit" id="succTit">Заказ отправлен!</div>
+  <div class="ssub" id="succSub">Детали заказа отправлены вам в чат</div>
   <button class="bnew" id="btnNew">🛒 Создать новый заказ</button>
 </div>
 
@@ -385,7 +453,6 @@ document.addEventListener('touchmove', function(e){ if (e.touches.length > 1) e.
 // ─── TELEGRAM WEBAPP ──────────────────────────────────────────
 var tg = window.Telegram && window.Telegram.WebApp;
 
-// Читаем параметры из URL (gas_url передаётся из кнопки Telegram)
 var urlParams  = new URLSearchParams(window.location.search);
 var GAS_URL    = decodeURIComponent(urlParams.get('gas_url') || '');
 var USER_ID    = urlParams.get('user_id')    || '';
@@ -393,6 +460,10 @@ var USERNAME   = urlParams.get('username')   || '';
 var USER_NAME  = decodeURIComponent(urlParams.get('name') || 'Пользователь');
 var CHAT_ID    = urlParams.get('chat_id')    || USER_ID;
 var MESSAGE_ID = urlParams.get('message_id') || '';
+var APP_MODE   = urlParams.get('mode')       || 'order'; // 'order' | 'purchase'
+
+// Права пользователя (заполняются после checkAccess)
+var USER_ACCESS = null; // 'Заказ' | 'Покупка' | 'Заказы/Покупка' | 'Нет'
 
 if (tg) {
   tg.ready();
@@ -408,7 +479,6 @@ if (tg) {
     if (tp.button_text_color)  document.documentElement.style.setProperty('--atxt',   tp.button_text_color);
   }
 
-  // Если данные пришли из Telegram WebApp, перезаписываем
   var initData = tg.initDataUnsafe || {};
   var tgUser   = initData.user || {};
   if (tgUser.id)         USER_ID   = tgUser.id.toString();
@@ -424,6 +494,8 @@ function fixH() {
   if (app) app.style.height = h + 'px';
   var s = document.getElementById('succ');
   if (s) s.style.height = h + 'px';
+  var ad = document.getElementById('access-denied');
+  if (ad) ad.style.height = h + 'px';
 }
 fixH();
 window.addEventListener('resize', fixH);
@@ -431,27 +503,56 @@ window.addEventListener('orientationchange', function(){ setTimeout(fixH, 300); 
 if (tg && tg.onEvent) tg.onEvent('viewportChanged', function(){ setTimeout(fixH, 100); });
 
 // ─── STATE ────────────────────────────────────────────────────
-var OBJ_HINTS  = [];   // массив объектов { name, address, comment }
-var PROD_HINTS = [];   // массив строк
+var OBJ_HINTS  = [];
+var PROD_HINTS = [];
 var icnt       = 0;
 var step       = 1;
-var priority   = '';   // 'low' | 'medium' | 'high'
+var priority   = '';
 var isNewObj   = false;
+var selectedFile = null;
 
-var STEPS = [
+var STEPS_ORDER = [
   { l: 'Шаг 1 из 4', t: '📍 Укажите объект'  },
   { l: 'Шаг 2 из 4', t: '🛒 Добавьте товары'  },
   { l: 'Шаг 3 из 4', t: '🔥 Приоритет заказа' },
   { l: 'Шаг 4 из 4', t: '✅ Проверьте заказ'  }
 ];
 
-// ─── LOAD HINTS ───────────────────────────────────────────────
-function loadHints() {
-  if (!GAS_URL) {
-    console.warn('GAS_URL не задан. Подсказки не загружены.');
-    startApp();
+// ─── ACCESS CHECK ─────────────────────────────────────────────
+function checkUserAccess(callback) {
+  if (!GAS_URL || !USER_ID) {
+    // Нет параметров — показываем контент без проверки (для отладки)
+    USER_ACCESS = 'Заказы/Покупка';
+    callback(true);
     return;
   }
+
+  var url = GAS_URL + '?action=access'
+    + '&user_id='  + encodeURIComponent(USER_ID)
+    + '&username=' + encodeURIComponent(USERNAME)
+    + '&name='     + encodeURIComponent(USER_NAME);
+
+  fetch(url)
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      USER_ACCESS = data.access || 'Нет';
+      if (!data.allowed) {
+        callback(false);
+      } else {
+        callback(true);
+      }
+    })
+    .catch(function(e){
+      console.warn('Access check failed:', e);
+      // При ошибке — показываем "нет доступа" на всякий случай
+      USER_ACCESS = 'Нет';
+      callback(false);
+    });
+}
+
+// ─── LOAD HINTS ───────────────────────────────────────────────
+function loadHints(callback) {
+  if (!GAS_URL) { callback(); return; }
   fetch(GAS_URL + '?action=hints')
     .then(function(r){ return r.json(); })
     .then(function(data){
@@ -459,27 +560,171 @@ function loadHints() {
       PROD_HINTS = data.products || [];
     })
     .catch(function(e){ console.warn('Hints load failed:', e); })
-    .finally(function(){ startApp(); });
+    .finally(function(){ callback(); });
 }
 
-function startApp() {
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('app').style.display     = 'flex';
-  init();
+// ─── STARTUP ──────────────────────────────────────────────────
+function startup() {
+  checkUserAccess(function(allowed) {
+    if (!allowed) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('access-denied').classList.add('show');
+      fixH();
+      return;
+    }
+
+    // Проверяем mode vs access
+    var hasOrder    = USER_ACCESS === 'Заказ'    || USER_ACCESS === 'Заказы/Покупка';
+    var hasPurchase = USER_ACCESS === 'Покупка'  || USER_ACCESS === 'Заказы/Покупка';
+
+    // Если запрошенный mode не доступен — переключаем
+    if (APP_MODE === 'order'    && !hasOrder)    APP_MODE = hasPurchase ? 'purchase' : 'order';
+    if (APP_MODE === 'purchase' && !hasPurchase) APP_MODE = hasOrder    ? 'order'    : 'purchase';
+
+    if (APP_MODE === 'order') {
+      loadHints(function(){
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('app').style.display     = 'flex';
+        initOrder();
+      });
+    } else {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('app').style.display     = 'flex';
+      initPurchase();
+    }
+  });
 }
 
-// ─── INIT ─────────────────────────────────────────────────────
-function init() {
+// ─── ORDER MODE INIT ──────────────────────────────────────────
+function initOrder() {
+  // Скрываем dots чека, настраиваем для заказа
+  document.getElementById('prog').style.display = 'flex';
   acObj(document.getElementById('objInp'), document.getElementById('objDrop'));
   document.getElementById('addBtn').addEventListener('click', addItem);
   document.getElementById('btnNext').addEventListener('click', onNext);
   document.getElementById('btnBack').addEventListener('click', onBack);
-  document.getElementById('btnNew').addEventListener('click', onNew);
+  document.getElementById('btnNew').addEventListener('click', onNewOrder);
   showStep(1);
   addItem();
 }
 
-// ─── STEPS ────────────────────────────────────────────────────
+// ─── PURCHASE MODE INIT ───────────────────────────────────────
+function initPurchase() {
+  document.getElementById('prog').style.display = 'none';
+  document.getElementById('slbl').textContent = 'Загрузка чека';
+  document.getElementById('stit').textContent = '🧾 Прикрепите чек';
+
+  document.getElementById('s-purchase').style.display = 'block';
+  document.getElementById('btnBack').style.display    = 'none';
+
+  var btn = document.getElementById('btnNext');
+  btn.textContent = '📤 Отправить чек';
+  btn.className   = 'bnx ok';
+  btn.disabled    = true;
+
+  document.getElementById('btnNext').addEventListener('click', onSendReceipt);
+  document.getElementById('btnNew').addEventListener('click', onNewPurchase);
+
+  // Настройка загрузки файла
+  var fileInput = document.getElementById('fileInput');
+  fileInput.addEventListener('change', function(){
+    if (this.files && this.files[0]) setFile(this.files[0]);
+  });
+
+  // Drag & drop
+  var dz = document.getElementById('dropZone');
+  dz.addEventListener('dragover', function(e){ e.preventDefault(); this.classList.add('drag'); });
+  dz.addEventListener('dragleave', function(){ this.classList.remove('drag'); });
+  dz.addEventListener('drop', function(e){
+    e.preventDefault(); this.classList.remove('drag');
+    if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+  });
+
+  // Настройка экрана успеха для чека
+  document.getElementById('succIco').textContent = '✅';
+  document.getElementById('succTit').textContent = 'Чек отправлен!';
+  document.getElementById('succSub').textContent = 'Чек успешно загружен в систему';
+  document.getElementById('btnNew').textContent  = '🧾 Загрузить ещё чек';
+
+  fixH();
+}
+
+function setFile(file) {
+  selectedFile = file;
+  var isImg = file.type.startsWith('image/');
+  document.getElementById('fpIcon').textContent = isImg ? '🖼' : '📄';
+  document.getElementById('fpName').textContent = file.name;
+  document.getElementById('fpSize').textContent = formatBytes(file.size);
+  document.getElementById('filePreview').classList.add('show');
+  document.getElementById('dropZone').style.display = 'none';
+
+  var btn = document.getElementById('btnNext');
+  btn.disabled = false;
+}
+
+function clearFile() {
+  selectedFile = null;
+  document.getElementById('fileInput').value = '';
+  document.getElementById('filePreview').classList.remove('show');
+  document.getElementById('dropZone').style.display = '';
+  document.getElementById('btnNext').disabled = true;
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024)       return bytes + ' Б';
+  if (bytes < 1048576)    return (bytes / 1024).toFixed(1) + ' КБ';
+  return (bytes / 1048576).toFixed(1) + ' МБ';
+}
+
+function onSendReceipt() {
+  if (!selectedFile) return;
+
+  var btn = document.getElementById('btnNext');
+  btn.disabled = true;
+  btn.textContent = '⏳ Отправка...';
+
+  // Конвертируем файл в base64 и отправляем через GAS
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var base64 = e.target.result.split(',')[1];
+    if (!GAS_URL) { showSucc(); return; }
+    fetch(GAS_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'receipt',
+        data: {
+          user_id:   USER_ID,
+          username:  USERNAME,
+          name:      USER_NAME,
+          chat_id:   CHAT_ID,
+          file_name: selectedFile.name,
+          file_type: selectedFile.type,
+          file_b64:  base64
+        }
+      })
+    })
+    .then(function(){ showSucc(); })
+    .catch(function(){
+      btn.textContent = '❌ Ошибка — повторить';
+      btn.className = 'bnx bad'; btn.disabled = false;
+      setTimeout(function(){ btn.textContent = '📤 Отправить чек'; btn.className = 'bnx ok'; }, 3000);
+    });
+  };
+  reader.onerror = function(){
+    btn.textContent = '❌ Ошибка файла';
+    btn.className = 'bnx bad'; btn.disabled = false;
+    setTimeout(function(){ btn.textContent = '📤 Отправить чек'; btn.className = 'bnx ok'; }, 3000);
+  };
+  reader.readAsDataURL(selectedFile);
+}
+
+function onNewPurchase() {
+  document.getElementById('succ').classList.remove('show');
+  clearFile();
+}
+
+// ─── ORDER STEPS ──────────────────────────────────────────────
 function showStep(n, dir) {
   step = n;
   var total = 4;
@@ -489,8 +734,8 @@ function showStep(n, dir) {
     if (i < n)      d.classList.add('done');
     else if (i===n) d.classList.add('active');
   }
-  document.getElementById('slbl').textContent = STEPS[n-1].l;
-  document.getElementById('stit').textContent = STEPS[n-1].t;
+  document.getElementById('slbl').textContent = STEPS_ORDER[n-1].l;
+  document.getElementById('stit').textContent = STEPS_ORDER[n-1].t;
 
   ['s1','s2','s3','s4'].forEach(function(id){
     var el = document.getElementById(id);
@@ -515,7 +760,6 @@ function showStep(n, dir) {
 }
 
 function onNext() {
-  // Шаг 1: проверяем объект
   if (step === 1) {
     var v = document.getElementById('objInp').value.trim();
     if (!v) {
@@ -526,7 +770,6 @@ function onNext() {
     document.getElementById('objInp').classList.remove('herr');
     document.getElementById('objErr').classList.remove('show');
 
-    // Если новый — сохраняем объект в таблицу
     if (isNewObj && GAS_URL) {
       var addr = document.getElementById('objAddr').value.trim();
       var cmt  = document.getElementById('objCmt').value.trim();
@@ -541,7 +784,6 @@ function onNext() {
     return;
   }
 
-  // Шаг 2: товары
   if (step === 2) {
     var items = collect();
     if (!items || !items.length) return;
@@ -549,7 +791,6 @@ function onNext() {
     return;
   }
 
-  // Шаг 3: приоритет
   if (step === 3) {
     if (!priority) {
       document.getElementById('prioErr').classList.add('show');
@@ -561,7 +802,6 @@ function onNext() {
     return;
   }
 
-  // Шаг 4: отправка
   if (step === 4) {
     var obj  = document.getElementById('objInp').value.trim();
     var its  = collect();
@@ -573,7 +813,7 @@ function onNext() {
 
     var objData = getObjData();
 
-    submit(obj, objData, its, priority, function(){
+    submitOrder(obj, objData, its, priority, function(){
       showSucc();
     }, function(){
       btn.textContent = '❌ Ошибка — повторить';
@@ -634,7 +874,6 @@ function fillObjExtra(name) {
   var cmtStatic  = document.getElementById('objCmtStatic');
 
   if (obj) {
-    // Существующий — статичный текст
     addrInp.style.display    = 'none';
     cmtInp.style.display     = 'none';
     addrStatic.style.display = 'block';
@@ -646,7 +885,6 @@ function fillObjExtra(name) {
     if (!obj.address) addrStatic.textContent = 'Не указан';
     if (!obj.comment) cmtStatic.textContent  = 'Нет комментария';
   } else {
-    // Новый объект — редактируемые поля
     isNewObj = true;
     document.getElementById('objExtraTitle').innerHTML =
       'Данные объекта <span class="new-badge">Новый</span>';
@@ -666,7 +904,7 @@ function checkObjNew(val) {
     return;
   }
   var exists = OBJ_HINTS.some(function(o){ return o.name.toLowerCase() === val.toLowerCase(); });
-  if (!exists) fillObjExtra(val); // покажет поля для нового
+  if (!exists) fillObjExtra(val);
 }
 
 function getObjData() {
@@ -736,7 +974,7 @@ function rmItem(id) {
 function setupQ(id) {
   var q = document.getElementById('q' + id);
   if (!q) return;
-  q._isDefault = true;  // флаг: значение дефолтное
+  q._isDefault = true;
   q.addEventListener('focus', function(){
     if (this._isDefault) {
       var self = this;
@@ -748,7 +986,7 @@ function setupQ(id) {
   q.addEventListener('input',    function(){
     this.value = this.value.replace(/[^0-9]/g,'');
     if (this.value===''||parseInt(this.value)<1) this.value=1;
-    this._isDefault = false;  // пользователь что-то ввёл — флаг снимаем
+    this._isDefault = false;
   });
   q.addEventListener('blur', function(){
     var v=parseInt(this.value);
@@ -837,8 +1075,8 @@ function buildConfirm() {
   });
 }
 
-// ─── SUBMIT ───────────────────────────────────────────────────
-function submit(obj, objData, items, prio, onOk, onErr) {
+// ─── SUBMIT ORDER ─────────────────────────────────────────────
+function submitOrder(obj, objData, items, prio, onOk, onErr) {
   if (!GAS_URL) { onErr(); return; }
   fetch(GAS_URL, {
     method: 'POST', mode: 'no-cors',
@@ -863,10 +1101,22 @@ function submit(obj, objData, items, prio, onOk, onErr) {
 
 // ─── SUCCESS ──────────────────────────────────────────────────
 function showSucc() {
+  // Настраиваем текст под режим
+  if (APP_MODE === 'purchase') {
+    document.getElementById('succIco').textContent = '✅';
+    document.getElementById('succTit').textContent = 'Чек отправлен!';
+    document.getElementById('succSub').textContent = 'Чек успешно загружен в систему';
+    document.getElementById('btnNew').textContent  = '🧾 Загрузить ещё чек';
+  } else {
+    document.getElementById('succIco').textContent = '✅';
+    document.getElementById('succTit').textContent = 'Заказ отправлен!';
+    document.getElementById('succSub').textContent = 'Детали заказа отправлены вам в чат';
+    document.getElementById('btnNew').textContent  = '🛒 Создать новый заказ';
+  }
   document.getElementById('succ').classList.add('show');
 }
 
-function onNew() {
+function onNewOrder() {
   document.getElementById('succ').classList.remove('show');
   document.getElementById('ilist').innerHTML = '';
   document.getElementById('objInp').value = '';
@@ -884,7 +1134,7 @@ function esc(s) {
 }
 
 // ─── START ────────────────────────────────────────────────────
-loadHints();
+startup();
 </script>
 </body>
 </html>
