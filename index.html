@@ -118,26 +118,6 @@ input.herr, textarea.herr {
 .emsg { color: var(--danger); font-size: 13px; margin-top: 6px; margin-left: 4px; display: none; }
 .emsg.show { display: block; }
 
-.static-field {
-  width: 100%; padding: 15px 16px;
-  border: 1.5px solid var(--border); border-radius: var(--radius);
-  background: var(--bg2); color: var(--text);
-  font-size: 16px; font-family: inherit;
-  min-height: 52px; line-height: 1.4;
-}
-.static-field.empty { color: var(--hint); font-style: italic; }
-
-.drop {
-  position: absolute; top: calc(100% + 6px); left: 0; right: 0;
-  background: var(--bg); border: 1.5px solid var(--border);
-  border-radius: var(--radius); box-shadow: 0 8px 28px rgba(0,0,0,0.12);
-  z-index: 300; max-height: 200px; overflow-y: auto; display: none;
-}
-.drop.open { display: block; }
-.ditem { padding: 14px 16px; font-size: 16px; border-bottom: 1px solid var(--border); cursor: pointer; }
-.ditem:last-child { border-bottom: none; }
-.ditem:active { background: var(--bg2); }
-
 .obj-extra {
   background: var(--bg2); border-radius: var(--radius);
   border: 1.5px solid var(--border); padding: 14px; margin-top: 4px; margin-bottom: 14px;
@@ -323,8 +303,7 @@ input.herr, textarea.herr {
 </div>
 
 
-  <!-- Доступ запрещён -->
-<div id="access-denied">
+  <div id="access-denied">
   <div class="ad-icon">⛔</div>
   <div class="ad-title">Доступ запрещён</div>
   <div class="ad-sub">Ваш аккаунт зафиксирован.<br>Обратитесь к администратору для получения доступа.</div>
@@ -342,7 +321,6 @@ input.herr, textarea.herr {
     <div class="stitle" id="stit"></div>
   </div>
 
-  <!-- Шаг 1: Объект -->
   <div id="s1" class="sbody" style="display:none">
     <div class="field">
       <input type="text" id="objInp" class="binp" placeholder="Название объекта" autocomplete="off">
@@ -353,25 +331,22 @@ input.herr, textarea.herr {
       <div class="obj-extra-title" id="objExtraTitle">Данные объекта</div>
       <div class="field">
         <div class="field-label">Номер заказа</div>
-        <div id="objAddrStatic" class="static-field" style="display:none"></div>
-        <input type="text" id="objAddr" placeholder="" autocomplete="off" style="display:none">
+        <input type="text" id="objAddr" placeholder="Введите номер заявки..." autocomplete="off">
+        <div class="emsg" id="addrErr">Укажите номер заявки</div>
       </div>
       <div class="field">
         <div class="field-label">Комментарий</div>
-        <div id="objCmtStatic" class="static-field" style="display:none"></div>
-        <textarea id="objCmt" placeholder="Дополнительная информация об объекте..." style="display:none"></textarea>
+        <textarea id="objCmt" placeholder="Дополнительная информация об объекте..."></textarea>
       </div>
     </div>
   </div>
 
-  <!-- Шаг 2: Товары -->
   <div id="s2" class="sbody" style="display:none">
     <div id="ilist"></div>
     <button class="badd" id="addBtn">＋ Добавить товар</button>
     <div id="anchor"></div>
   </div>
 
-  <!-- Шаг 3: Приоритет -->
   <div id="s3" class="sbody" style="display:none">
     <div class="priority-wrap">
       <div class="priority-label">Выберите приоритет заказа</div>
@@ -390,7 +365,6 @@ input.herr, textarea.herr {
     </div>
   </div>
 
-  <!-- Шаг 4: Подтверждение -->
   <div id="s4" class="sbody" style="display:none">
     <div class="cblock">
       <div class="cstitle">📦 Объект</div>
@@ -408,7 +382,6 @@ input.herr, textarea.herr {
     </div>
   </div>
 
-  <!-- Экран чека (purchase mode) -->
   <div id="s-purchase" class="sbody" style="display:none">
     <div id="purchase-screen">
       <div class="purchase-icon">🧾</div>
@@ -763,16 +736,32 @@ function showStep(n, dir) {
 function onNext() {
   if (step === 1) {
     var v = document.getElementById('objInp').value.trim();
+    var addr = document.getElementById('objAddr').value.trim();
+    var err = false;
+
+    // Валидация Названия объекта
     if (!v) {
       document.getElementById('objInp').classList.add('herr');
       document.getElementById('objErr').classList.add('show');
-      return;
+      err = true;
+    } else {
+      document.getElementById('objInp').classList.remove('herr');
+      document.getElementById('objErr').classList.remove('show');
     }
-    document.getElementById('objInp').classList.remove('herr');
-    document.getElementById('objErr').classList.remove('show');
 
-    if (isNewObj && GAS_URL) {
-      var addr = document.getElementById('objAddr').value.trim();
+    // Валидация Номера заявки
+    if (!addr) {
+      document.getElementById('objAddr').classList.add('herr');
+      document.getElementById('addrErr').classList.add('show');
+      err = true;
+    } else {
+      document.getElementById('objAddr').classList.remove('herr');
+      document.getElementById('addrErr').classList.remove('show');
+    }
+
+    if (err) return;
+
+    if (GAS_URL) {
       var cmt  = document.getElementById('objCmt').value.trim();
       fetch(GAS_URL, {
         method: 'POST', mode: 'no-cors',
@@ -867,34 +856,23 @@ function fillObjExtra(name) {
   extra.style.display = 'block';
   isNewObj = false;
 
-  document.getElementById('objExtraTitle').innerHTML = 'Данные объекта';
+  var addrInp = document.getElementById('objAddr');
+  var cmtInp  = document.getElementById('objCmt');
 
-  var addrInp    = document.getElementById('objAddr');
-  var addrStatic = document.getElementById('objAddrStatic');
-  var cmtInp     = document.getElementById('objCmt');
-  var cmtStatic  = document.getElementById('objCmtStatic');
+  // Поля всегда пустые под ручной ввод
+  addrInp.value = '';
+  cmtInp.value  = '';
+  
+  // Убираем подсветку ошибок, если она была
+  addrInp.classList.remove('herr');
+  document.getElementById('addrErr').classList.remove('show');
 
   if (obj) {
-    addrInp.style.display    = 'none';
-    cmtInp.style.display     = 'none';
-    addrStatic.style.display = 'block';
-    cmtStatic.style.display  = 'block';
-    addrStatic.textContent   = obj.address || '';
-    cmtStatic.textContent    = obj.comment || '';
-    addrStatic.className     = 'static-field' + (obj.address ? '' : ' empty');
-    cmtStatic.className      = 'static-field' + (obj.comment ? '' : ' empty');
-    if (!obj.address) addrStatic.textContent = 'Не указан';
-    if (!obj.comment) cmtStatic.textContent  = 'Нет комментария';
+    document.getElementById('objExtraTitle').innerHTML = 'Данные объекта';
   } else {
     isNewObj = true;
     document.getElementById('objExtraTitle').innerHTML =
       'Данные объекта <span class="new-badge">Новый</span>';
-    addrStatic.style.display = 'none';
-    cmtStatic.style.display  = 'none';
-    addrInp.style.display    = 'block';
-    cmtInp.style.display     = 'block';
-    addrInp.value = '';
-    cmtInp.value  = '';
   }
 }
 
@@ -905,19 +883,22 @@ function checkObjNew(val) {
     return;
   }
   var exists = OBJ_HINTS.some(function(o){ return o.name.toLowerCase() === val.toLowerCase(); });
-  if (!exists) fillObjExtra(val);
+  if (!exists) {
+    fillObjExtra(val);
+  } else {
+    // Если ввели вручную существующее имя
+    var extra = document.getElementById('objExtra');
+    if (extra.style.display !== 'block') {
+      fillObjExtra(val);
+    }
+  }
 }
 
 function getObjData() {
-  var name = document.getElementById('objInp').value.trim();
-  if (isNewObj) {
-    return {
-      address: document.getElementById('objAddr').value.trim(),
-      comment: document.getElementById('objCmt').value.trim()
-    };
-  }
-  var obj = OBJ_HINTS.find(function(o){ return o.name === name; });
-  return obj ? { address: obj.address || '', comment: obj.comment || '' } : { address: '', comment: '' };
+  return {
+    address: document.getElementById('objAddr').value.trim(),
+    comment: document.getElementById('objCmt').value.trim()
+  };
 }
 
 // ─── PRIORITY ─────────────────────────────────────────────────
@@ -971,6 +952,14 @@ function rmItem(id) {
   if (el) el.remove();
   if (!document.getElementById('ilist').children.length) addItem();
 }
+
+// Слушатели для сброса ошибок "на лету" при вводе в Номер заявки
+document.getElementById('objAddr').addEventListener('input', function(){
+  if (this.value.trim()) {
+    this.classList.remove('herr');
+    document.getElementById('addrErr').classList.remove('show');
+  }
+});
 
 function setupQ(id) {
   var q = document.getElementById('q' + id);
@@ -1050,7 +1039,7 @@ function buildConfirm() {
   document.getElementById('cobj').textContent = objName;
   var addrEl = document.getElementById('cobjAddr');
   var cmtEl  = document.getElementById('cobjCmt');
-  addrEl.textContent = objData.address ? '📍 ' + objData.address : '';
+  addrEl.textContent = objData.address ? 'Номер заказа: ' + objData.address : '';
   cmtEl.textContent  = objData.comment ? '💬 ' + objData.comment : '';
 
   document.getElementById('cprioWrap').innerHTML =
@@ -1102,7 +1091,6 @@ function submitOrder(obj, objData, items, prio, onOk, onErr) {
 
 // ─── SUCCESS ──────────────────────────────────────────────────
 function showSucc() {
-  // Настраиваем текст под режим
   if (APP_MODE === 'purchase') {
     document.getElementById('succIco').textContent = '✅';
     document.getElementById('succTit').textContent = 'Чек отправлен!';
@@ -1121,6 +1109,8 @@ function onNewOrder() {
   document.getElementById('succ').classList.remove('show');
   document.getElementById('ilist').innerHTML = '';
   document.getElementById('objInp').value = '';
+  document.getElementById('objAddr').value = '';
+  document.getElementById('objCmt').value = '';
   document.getElementById('objExtra').style.display = 'none';
   priority = '';
   isNewObj = false;
