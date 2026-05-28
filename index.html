@@ -1,1 +1,1158 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Создать заказ</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+:root {
+  --bg:     #ffffff;
+  --bg2:    #f2f2f7;
+  --bg3:    #e5e5ea;
+  --text:   #111111;
+  --hint:   #8e8e93;
+  --accent: #3390ec;
+  --atxt:   #ffffff;
+  --border: rgba(0,0,0,0.09);
+  --danger: #e53935;
+  --green:  #34c759;
+  --radius: 16px;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: pan-x pan-y;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.prog { flex-shrink: 0; padding: 14px 20px 0; display: flex; gap: 8px; }
+.pdot { flex: 1; height: 4px; border-radius: 2px; background: var(--bg3); transition: background 0.3s; }
+.pdot.active { background: var(--accent); }
+.pdot.done   { background: var(--green); }
+
+.shdr { flex-shrink: 0; padding: 14px 20px 8px; }
+.slbl { font-size: 12px; font-weight: 600; color: var(--hint); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+.stitle { font-size: 22px; font-weight: 700; line-height: 1.2; }
+
+.sbody {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 14px 20px;
+  overscroll-behavior: contain; min-height: 0;
+}
+.sbody::-webkit-scrollbar { display: none; }
+
+.bbar {
+  flex-shrink: 0; padding: 12px 20px;
+  padding-bottom: max(16px, calc(env(safe-area-inset-bottom, 0px) + 12px));
+  background: var(--bg); border-top: 1px solid var(--border);
+  display: flex; gap: 12px;
+}
+.bbk {
+  width: 54px; height: 56px; border: 1.5px solid var(--border);
+  border-radius: var(--radius); background: var(--bg2); color: var(--text);
+  font-size: 22px; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0;
+  -webkit-appearance: none; appearance: none;
+}
+.bbk:active { opacity: 0.6; }
+.bnx {
+  flex: 1; height: 56px; border: none; border-radius: var(--radius);
+  background: var(--accent); color: var(--atxt);
+  font-size: 17px; font-weight: 600; cursor: pointer; font-family: inherit;
+  letter-spacing: 0.2px; transition: opacity 0.15s;
+  box-shadow: 0 4px 14px rgba(51,144,236,0.35);
+  -webkit-appearance: none; appearance: none;
+}
+.bnx:active   { opacity: 0.8; }
+.bnx:disabled { opacity: 0.45; box-shadow: none; }
+.bnx.ok  { background: var(--green); box-shadow: 0 4px 14px rgba(52,199,89,0.35); }
+.bnx.bad { background: var(--danger); box-shadow: none; }
+
+.field { position: relative; margin-bottom: 14px; }
+.field-label { font-size: 12px; font-weight: 600; color: var(--hint); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; padding-left: 2px; }
+
+input[type="text"], input[type="number"], textarea {
+  width: 100%; padding: 15px 16px;
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  background: var(--bg2); color: var(--text);
+  font-size: 16px; font-family: inherit; outline: none;
+  -webkit-appearance: none; appearance: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.binp { font-size: 18px !important; padding: 18px 16px !important; font-weight: 500; }
+input[type="number"] { -moz-appearance: textfield; }
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(51,144,236,0.12);
+  background: var(--bg);
+}
+input::placeholder, textarea::placeholder { color: var(--hint); }
+textarea { resize: none; min-height: 84px; }
+input.herr, textarea.herr {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 3px rgba(229,57,53,0.1);
+}
+.emsg { color: var(--danger); font-size: 13px; margin-top: 6px; margin-left: 4px; display: none; }
+.emsg.show { display: block; }
+
+/* ── СТИЛИ ДЛЯ КРАСИВЫХ ПОДСКАЗОК (AUTOCOMPLETE) ── */
+.drop {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+  display: none;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.drop.open {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+.ditem {
+  padding: 12px 16px;
+  font-size: 15px;
+  color: var(--text);
+  cursor: pointer;
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+  transition: background 0.15s;
+}
+.ditem:last-child { border-bottom: none; }
+.ditem:hover, .ditem:active {
+  background: var(--bg2);
+}
+
+.obj-extra {
+  background: var(--bg2); border-radius: var(--radius);
+  border: 1.5px solid var(--border); padding: 14px; margin-top: 4px; margin-bottom: 14px;
+}
+.obj-extra-title {
+  font-size: 12px; font-weight: 600; color: var(--hint);
+  text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px;
+}
+.obj-extra .field { margin-bottom: 10px; }
+.obj-extra .field:last-child { margin-bottom: 0; }
+.new-badge {
+  display: inline-block; background: rgba(51,144,236,0.12); color: var(--accent);
+  font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px;
+  margin-left: 8px; vertical-align: middle; letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.icard {
+  background: var(--bg2); border-radius: var(--radius);
+  border: 1.5px solid var(--border); padding: 14px; margin-bottom: 12px;
+}
+.irow { display: flex; gap: 10px; align-items: flex-start; }
+.inwrap { flex: 1; position: relative; }
+.iqwrap { width: 80px; flex-shrink: 0; }
+.rmbtn {
+  width: 38px; height: 38px; background: none; border: none;
+  color: var(--danger); font-size: 26px; cursor: pointer; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 6px; flex-shrink: 0; opacity: 0.75; -webkit-appearance: none;
+}
+.rmbtn:active { opacity: 1; background: rgba(229,57,53,0.08); }
+.tcmt {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 10px;
+  color: var(--accent); font-size: 14px; cursor: pointer; user-select: none; font-weight: 500;
+}
+.tcmt .ic {
+  width: 22px; height: 22px; border-radius: 50%; background: var(--accent);
+  color: var(--atxt); font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.carea { margin-top: 10px; display: none; }
+.carea.open { display: block; }
+.badd {
+  width: 100%; padding: 15px;
+  border: 2px dashed rgba(51,144,236,0.4); border-radius: var(--radius);
+  background: rgba(51,144,236,0.04); color: var(--accent);
+  font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 6px;
+  font-family: inherit; -webkit-appearance: none;
+}
+.badd:active { opacity: 0.7; }
+#anchor { height: 1px; visibility: hidden; pointer-events: none; }
+
+.priority-wrap { margin-bottom: 14px; }
+.priority-label { font-size: 12px; font-weight: 600; color: var(--hint); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; padding-left: 2px; }
+.priority-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.prio-btn {
+  padding: 13px 8px; border: 1.5px solid var(--border);
+  border-radius: var(--radius); background: var(--bg2);
+  color: var(--text); font-size: 14px; font-weight: 600;
+  cursor: pointer; text-align: center; font-family: inherit;
+  transition: all 0.15s; -webkit-appearance: none;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.prio-btn .pico { font-size: 20px; }
+.prio-btn:active { opacity: 0.7; }
+.prio-btn.sel-low    { border-color: var(--green);  background: rgba(52,199,89,0.1);  color: #1a8c3a; }
+.prio-btn.sel-medium { border-color: #ff9f0a;       background: rgba(255,159,10,0.1); color: #b36800; }
+.prio-btn.sel-high   { border-color: var(--danger); background: rgba(229,57,53,0.1);  color: var(--danger); }
+
+.cblock {
+  background: var(--bg2); border-radius: var(--radius);
+  border: 1.5px solid var(--border); padding: 16px; margin-bottom: 14px;
+}
+.cstitle { font-size: 12px; font-weight: 600; color: var(--hint); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 10px; }
+.coval { font-size: 18px; font-weight: 700; line-height: 1.3; }
+.coval-sub { font-size: 14px; color: var(--hint); margin-top: 4px; line-height: 1.4; }
+.citem { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.citem:last-child { border-bottom: none; padding-bottom: 0; }
+.cnum {
+  width: 26px; height: 26px; border-radius: 50%; background: var(--accent);
+  color: var(--atxt); font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.cname { flex: 1; font-size: 16px; font-weight: 600; line-height: 1.3; }
+.cqty  { font-size: 15px; color: var(--hint); flex-shrink: 0; font-weight: 500; }
+.ccmt  { font-size: 13px; color: var(--hint); margin-top: 3px; }
+.cprio {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 20px;
+  font-size: 14px; font-weight: 700; margin-top: 2px;
+}
+.cprio.low    { background: rgba(52,199,89,0.12);  color: #1a8c3a; }
+.cprio.medium { background: rgba(255,159,10,0.12); color: #b36800; }
+.cprio.high   { background: rgba(229,57,53,0.12);  color: var(--danger); }
+
+/* ── PURCHASE (чек) ── */
+#purchase-screen {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 32px 24px; gap: 20px;
+  flex: 1;
+}
+.purchase-icon { font-size: 64px; margin-bottom: 4px; }
+.purchase-title { font-size: 22px; font-weight: 700; text-align: center; }
+.purchase-sub   { font-size: 15px; color: var(--hint); text-align: center; line-height: 1.5; margin-bottom: 8px; }
+.file-drop-zone {
+  width: 100%; padding: 32px 20px;
+  border: 2px dashed rgba(51,144,236,0.4); border-radius: var(--radius);
+  background: rgba(51,144,236,0.04); text-align: center;
+  cursor: pointer; transition: all 0.15s;
+}
+.file-drop-zone:active, .file-drop-zone.drag { border-color: var(--accent); background: rgba(51,144,236,0.1); }
+.file-drop-zone .fdi { font-size: 36px; margin-bottom: 10px; }
+.file-drop-zone .fdt { font-size: 15px; color: var(--accent); font-weight: 600; }
+.file-drop-zone .fds { font-size: 13px; color: var(--hint); margin-top: 4px; }
+#fileInput { display: none; }
+.file-preview {
+  width: 100%; background: var(--bg2); border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px; display: none;
+}
+.file-preview.show { display: flex; }
+.fp-icon { font-size: 32px; flex-shrink: 0; }
+.fp-name { flex: 1; font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fp-size { font-size: 13px; color: var(--hint); margin-top: 2px; }
+.fp-rm   { width: 32px; height: 32px; border: none; background: none; color: var(--danger); font-size: 22px; cursor: pointer; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.fp-rm:active { background: rgba(229,57,53,0.08); }
+
+/* ── ACCESS DENIED ── */
+#access-denied {
+  display: none; position: fixed; inset: 0;
+  flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 40px 24px; background: var(--bg); z-index: 998;
+}
+#access-denied.show { display: flex; }
+.ad-icon { font-size: 72px; margin-bottom: 20px; }
+.ad-title { font-size: 24px; font-weight: 700; margin-bottom: 10px; color: var(--danger); }
+.ad-sub   { font-size: 16px; color: var(--hint); line-height: 1.5; }
+
+/* Loading */
+#loading {
+  display: flex; position: fixed; inset: 0;
+  flex-direction: column; align-items: center; justify-content: center;
+  background: var(--bg); z-index: 1000;
+}
+.spin {
+  width: 40px; height: 40px; border: 3px solid var(--bg3);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin 0.7s linear infinite; margin-bottom: 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.ldtxt { color: var(--hint); font-size: 15px; }
+
+/* Success */
+#succ {
+  display: none; position: fixed; inset: 0;
+  flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 40px 24px; background: var(--bg); z-index: 999;
+}
+#succ.show { display: flex; }
+.sico  { font-size: 72px; margin-bottom: 20px; }
+.stit  { font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+.ssub  { font-size: 16px; color: var(--hint); margin-bottom: 36px; line-height: 1.5; }
+.bnew {
+  padding: 17px 36px; border: none; border-radius: var(--radius);
+  background: var(--accent); color: var(--atxt); font-size: 17px; font-weight: 600;
+  cursor: pointer; font-family: inherit; box-shadow: 0 4px 18px rgba(51,144,236,0.35);
+  -webkit-appearance: none;
+}
+.bnew:active { opacity: 0.85; }
+
+@keyframes sRight { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes sLeft  { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: translateX(0); } }
+.aright { animation: sRight 0.22s ease; }
+.aleft  { animation: sLeft  0.22s ease; }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spin"></div>
+  <div class="ldtxt">Загрузка...</div>
+</div>
+
+<div id="access-denied">
+  <div class="ad-icon">⛔</div>
+  <div class="ad-title">Доступ запрещён</div>
+  <div class="ad-sub">Ваш аккаунт зафиксирован.<br>Обратитесь к администратору для получения доступа.</div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="prog" id="prog">
+    <div class="pdot" id="d1"></div>
+    <div class="pdot" id="d2"></div>
+    <div class="pdot" id="d3"></div>
+    <div class="pdot" id="d4"></div>
+  </div>
+  <div class="shdr">
+    <div class="slbl" id="slbl"></div>
+    <div class="stitle" id="stit"></div>
+  </div>
+
+  <div id="s1" class="sbody" style="display:none">
+    <div class="field">
+      <input type="text" id="objInp" class="binp" placeholder="Название объекта" autocomplete="off">
+      <div class="drop" id="objDrop"></div>
+      <div class="emsg" id="objErr">Укажите объект</div>
+    </div>
+    <div id="objExtra" class="obj-extra" style="display:none">
+      <div class="obj-extra-title" id="objExtraTitle">Данные объекта</div>
+      <div class="field">
+        <div class="field-label">Номер заказа</div>
+        <input type="text" id="objAddr" placeholder="Введите номер заявки..." autocomplete="off">
+        <div class="emsg" id="addrErr">Укажите номер заявки</div>
+      </div>
+      <div class="field">
+        <div class="field-label">Комментарий</div>
+        <textarea id="objCmt" placeholder="Дополнительная информация об объекте..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div id="s2" class="sbody" style="display:none">
+    <div id="ilist"></div>
+    <button class="badd" id="addBtn">＋ Добавить товар</button>
+    <div id="anchor"></div>
+  </div>
+
+  <div id="s3" class="sbody" style="display:none">
+    <div class="priority-wrap">
+      <div class="priority-label">Выберите приоритет заказа</div>
+      <div class="priority-grid">
+        <button class="prio-btn" id="prio-low"    onclick="setPrio('low')">
+          <span class="pico">🟢</span>Низкий
+        </button>
+        <button class="prio-btn" id="prio-medium" onclick="setPrio('medium')">
+          <span class="pico">🟡</span>Средний
+        </button>
+        <button class="prio-btn" id="prio-high"   onclick="setPrio('high')">
+          <span class="pico">🔴</span>Высокий
+        </button>
+      </div>
+      <div class="emsg" id="prioErr" style="margin-top:10px">Выберите приоритет</div>
+    </div>
+  </div>
+
+  <div id="s4" class="sbody" style="display:none">
+    <div class="cblock">
+      <div class="cstitle">📦 Объект</div>
+      <div class="coval" id="cobj"></div>
+      <div class="coval-sub" id="cobjAddr"></div>
+      <div class="coval-sub" id="cobjCmt"></div>
+    </div>
+    <div class="cblock">
+      <div class="cstitle">🔥 Приоритет</div>
+      <div id="cprioWrap"></div>
+    </div>
+    <div class="cblock">
+      <div class="cstitle">🛒 Товары</div>
+      <div id="citems"></div>
+    </div>
+  </div>
+
+  <div id="s-purchase" class="sbody" style="display:none">
+    <div id="purchase-screen">
+      <div class="purchase-icon">🧾</div>
+      <div class="purchase-title">Загрузить чек</div>
+      <div class="purchase-sub">Прикрепите фото или PDF чека для отправки в систему</div>
+      <div class="file-drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <div class="fdi">📎</div>
+        <div class="fdt">Выбрать файл</div>
+        <div class="fds">Фото (JPG, PNG) или PDF</div>
+      </div>
+      <input type="file" id="fileInput" accept="image/*,application/pdf">
+      <div class="file-preview" id="filePreview">
+        <div class="fp-icon" id="fpIcon">🖼</div>
+        <div style="flex:1;min-width:0">
+          <div class="fp-name" id="fpName"></div>
+          <div class="fp-size" id="fpSize"></div>
+        </div>
+        <button class="fp-rm" onclick="clearFile()">×</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bbar">
+    <button class="bbk" id="btnBack" style="display:none">←</button>
+    <button class="bnx" id="btnNext">Далее →</button>
+  </div>
+</div>
+
+<div id="succ">
+  <div class="sico" id="succIco">✅</div>
+  <div class="stit" id="succTit">Заказ отправлен!</div>
+  <div class="ssub" id="succSub">Детали заказа отправлены вам в чат</div>
+  <button class="bnew" id="btnNew">🛒 Создать новый заказ</button>
+</div>
+
+<script>
+// ─── PREVENT ZOOM ─────────────────────────────────────────────
+document.addEventListener('gesturestart',  function(e){ e.preventDefault(); }, { passive: false });
+document.addEventListener('gesturechange', function(e){ e.preventDefault(); }, { passive: false });
+document.addEventListener('gestureend',    function(e){ e.preventDefault(); }, { passive: false });
+document.addEventListener('touchmove', function(e){ if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+
+// ─── TELEGRAM WEBAPP ──────────────────────────────────────────
+var tg = window.Telegram && window.Telegram.WebApp;
+
+var urlParams  = new URLSearchParams(window.location.search);
+var GAS_URL    = decodeURIComponent(urlParams.get('gas_url') || '');
+var USER_ID    = urlParams.get('user_id')    || '';
+var USERNAME   = urlParams.get('username')   || '';
+var USER_NAME  = decodeURIComponent(urlParams.get('name') || 'Пользователь');
+var CHAT_ID    = urlParams.get('chat_id')    || USER_ID;
+var MESSAGE_ID = urlParams.get('message_id') || '';
+var APP_MODE   = urlParams.get('mode')       || 'order'; 
+
+var USER_ACCESS = null; 
+
+if (tg) {
+  tg.ready();
+  tg.expand();
+
+  if (tg.themeParams) {
+    var tp = tg.themeParams;
+    if (tp.bg_color)           document.documentElement.style.setProperty('--bg',     tp.bg_color);
+    if (tp.secondary_bg_color) document.documentElement.style.setProperty('--bg2',    tp.secondary_bg_color);
+    if (tp.text_color)         document.documentElement.style.setProperty('--text',   tp.text_color);
+    if (tp.hint_color)         document.documentElement.style.setProperty('--hint',   tp.hint_color);
+    if (tp.button_color)       document.documentElement.style.setProperty('--accent', tp.button_color);
+    if (tp.button_text_color)  document.documentElement.style.setProperty('--atxt',   tp.button_text_color);
+  }
+
+  var initData = tg.initDataUnsafe || {};
+  var tgUser   = initData.user || {};
+  if (tgUser.id)         USER_ID   = tgUser.id.toString();
+  if (tgUser.username)   USERNAME  = tgUser.username;
+  if (tgUser.first_name) USER_NAME = tgUser.first_name;
+  if (USER_ID)           CHAT_ID   = USER_ID;
+}
+
+// ─── HEIGHT FIX ───────────────────────────────────────────────
+function fixH() {
+  var h   = window.innerHeight;
+  var app = document.getElementById('app');
+  if (app) app.style.height = h + 'px';
+  var s = document.getElementById('succ');
+  if (s) s.style.height = h + 'px';
+  var ad = document.getElementById('access-denied');
+  if (ad) ad.style.height = h + 'px';
+}
+fixH();
+window.addEventListener('resize', fixH);
+window.addEventListener('orientationchange', function(){ setTimeout(fixH, 300); });
+if (tg && tg.onEvent) tg.onEvent('viewportChanged', function(){ setTimeout(fixH, 100); });
+
+// ─── STATE ────────────────────────────────────────────────────
+var OBJ_HINTS  = [];
+var PROD_HINTS = [];
+var icnt       = 0;
+var step       = 1;
+var priority   = '';
+var isNewObj   = false;
+var selectedFile = null;
+
+var STEPS_ORDER = [
+  { l: 'Шаг 1 из 4', t: '📍 Укажите объект'  },
+  { l: 'Шаг 2 из 4', t: '🛒 Добавьте товары'  },
+  { l: 'Шаг 3 из 4', t: '🔥 Приоритет заказа' },
+  { l: 'Шаг 4 из 4', t: '✅ Проверьте заказ'  }
+];
+
+// ─── ACCESS CHECK ─────────────────────────────────────────────
+function checkUserAccess(callback) {
+  if (!GAS_URL || !USER_ID) {
+    USER_ACCESS = 'Заказы/Покупка';
+    callback(true);
+    return;
+  }
+
+  var url = GAS_URL + '?action=access'
+    + '&user_id='  + encodeURIComponent(USER_ID)
+    + '&username=' + encodeURIComponent(USERNAME)
+    + '&name='     + encodeURIComponent(USER_NAME);
+
+  fetch(url)
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      USER_ACCESS = data.access || 'Нет';
+      if (!data.allowed) {
+        callback(false);
+      } else {
+        callback(true);
+      }
+    })
+    .catch(function(e){
+      console.warn('Access check failed:', e);
+      USER_ACCESS = 'Нет';
+      callback(false);
+    });
+}
+
+// ─── LOAD HINTS ───────────────────────────────────────────────
+function loadHints(callback) {
+  if (!GAS_URL) { callback(); return; }
+  fetch(GAS_URL + '?action=hints')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      OBJ_HINTS  = data.objects  || [];
+      PROD_HINTS = data.products || [];
+    })
+    .catch(function(e){ console.warn('Hints load failed:', e); })
+    .finally(function(){ callback(); });
+}
+
+// ─── STARTUP ──────────────────────────────────────────────────
+function startup() {
+  checkUserAccess(function(allowed) {
+    if (!allowed) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('access-denied').classList.add('show');
+      fixH();
+      return;
+    }
+
+    var hasOrder    = USER_ACCESS === 'Заказ'    || USER_ACCESS === 'Заказы/Покупка';
+    var hasPurchase = USER_ACCESS === 'Покупка'  || USER_ACCESS === 'Заказы/Покупка';
+
+    if (APP_MODE === 'order'    && !hasOrder)    APP_MODE = hasPurchase ? 'purchase' : 'order';
+    if (APP_MODE === 'purchase' && !hasPurchase) APP_MODE = hasOrder    ? 'order'    : 'purchase';
+
+    if (APP_MODE === 'order') {
+      loadHints(function(){
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('app').style.display     = 'flex';
+        initOrder();
+      });
+    } else {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('app').style.display     = 'flex';
+      initPurchase();
+    }
+  });
+}
+
+// ─── ORDER MODE INIT ──────────────────────────────────────────
+function initOrder() {
+  document.getElementById('prog').style.display = 'flex';
+  acObj(document.getElementById('objInp'), document.getElementById('objDrop'));
+  document.getElementById('addBtn').addEventListener('click', addItem);
+  document.getElementById('btnNext').addEventListener('click', onNext);
+  document.getElementById('btnBack').addEventListener('click', onBack);
+  document.getElementById('btnNew').addEventListener('click', onNewOrder);
+  showStep(1);
+  addItem();
+}
+
+// ─── PURCHASE MODE INIT ───────────────────────────────────────
+function initPurchase() {
+  document.getElementById('prog').style.display = 'none';
+  document.getElementById('slbl').textContent = 'Загрузка чека';
+  document.getElementById('stit').textContent = '🧾 Прикрепите чек';
+
+  document.getElementById('s-purchase').style.display = 'block';
+  document.getElementById('btnBack').style.display    = 'none';
+
+  var btn = document.getElementById('btnNext');
+  btn.textContent = '📤 Отправить чек';
+  btn.className   = 'bnx ok';
+  btn.disabled    = true;
+
+  document.getElementById('btnNext').addEventListener('click', onSendReceipt);
+  document.getElementById('btnNew').addEventListener('click', onNewPurchase);
+
+  var fileInput = document.getElementById('fileInput');
+  fileInput.addEventListener('change', function(){
+    if (this.files && this.files[0]) setFile(this.files[0]);
+  });
+
+  var dz = document.getElementById('dropZone');
+  dz.addEventListener('dragover', function(e){ e.preventDefault(); this.classList.add('drag'); });
+  dz.addEventListener('dragleave', function(){ this.classList.remove('drag'); });
+  dz.addEventListener('drop', function(e){
+    e.preventDefault(); this.classList.remove('drag');
+    if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+  });
+
+  document.getElementById('succIco').textContent = '✅';
+  document.getElementById('succTit').textContent = 'Чек отправлен!';
+  document.getElementById('succSub').textContent = 'Чек успешно загружен в систему';
+  document.getElementById('btnNew').textContent  = '🧾 Загрузить ещё чек';
+
+  fixH();
+}
+
+function setFile(file) {
+  selectedFile = file;
+  var isImg = file.type.startsWith('image/');
+  document.getElementById('fpIcon').textContent = isImg ? '🖼' : '📄';
+  document.getElementById('fpName').textContent = file.name;
+  document.getElementById('fpSize').textContent = formatBytes(file.size);
+  document.getElementById('filePreview').classList.add('show');
+  document.getElementById('dropZone').style.display = 'none';
+
+  var btn = document.getElementById('btnNext');
+  btn.disabled = false;
+}
+
+function clearFile() {
+  selectedFile = null;
+  document.getElementById('fileInput').value = '';
+  document.getElementById('filePreview').classList.remove('show');
+  document.getElementById('dropZone').style.display = '';
+  document.getElementById('btnNext').disabled = true;
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024)       return bytes + ' Б';
+  if (bytes < 1048576)    return (bytes / 1024).toFixed(1) + ' КБ';
+  return (bytes / 1048576).toFixed(1) + ' МБ';
+}
+
+function onSendReceipt() {
+  if (!selectedFile) return;
+
+  var btn = document.getElementById('btnNext');
+  btn.disabled = true;
+  btn.textContent = '⏳ Отправка...';
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var base64 = e.target.result.split(',')[1];
+    if (!GAS_URL) { showSucc(); return; }
+    fetch(GAS_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'receipt',
+        data: {
+          user_id:   USER_ID,
+          username:  USERNAME,
+          name:      USER_NAME,
+          chat_id:   CHAT_ID,
+          file_name: selectedFile.name,
+          file_type: selectedFile.type,
+          file_b64:  base64
+        }
+      })
+    })
+    .then(function(){ showSucc(); })
+    .catch(function(){
+      btn.textContent = '❌ Ошибка — повторить';
+      btn.className = 'bnx bad'; btn.disabled = false;
+      setTimeout(function(){ btn.textContent = '📤 Отправить чек'; btn.className = 'bnx ok'; }, 3000);
+    });
+  };
+  reader.onerror = function(){
+    btn.textContent = '❌ Ошибка файла';
+    btn.className = 'bnx bad'; btn.disabled = false;
+    setTimeout(function(){ btn.textContent = '📤 Отправить чек'; btn.className = 'bnx ok'; }, 3000);
+  };
+  reader.readAsDataURL(selectedFile);
+}
+
+function onNewPurchase() {
+  document.getElementById('succ').classList.remove('show');
+  clearFile();
+}
+
+// ─── ORDER STEPS ──────────────────────────────────────────────
+function showStep(n, dir) {
+  step = n;
+  var total = 4;
+  for (var i = 1; i <= total; i++) {
+    var d = document.getElementById('d' + i);
+    d.className = 'pdot';
+    if (i < n)      d.classList.add('done');
+    else if (i===n) d.classList.add('active');
+  }
+  document.getElementById('slbl').textContent = STEPS_ORDER[n-1].l;
+  document.getElementById('stit').textContent = STEPS_ORDER[n-1].t;
+
+  ['s1','s2','s3','s4'].forEach(function(id){
+    var el = document.getElementById(id);
+    el.style.display = 'none';
+    el.classList.remove('aright','aleft');
+  });
+  var body = document.getElementById('s' + n);
+  body.style.display = 'block';
+  if (dir){ void body.offsetWidth; body.classList.add(dir==='f'?'aright':'aleft'); }
+
+  document.getElementById('btnBack').style.display = n > 1 ? 'flex' : 'none';
+
+  var btn = document.getElementById('btnNext');
+  btn.disabled = false; btn.className = 'bnx';
+  if (n === 4){ btn.textContent = '📤 Отправить заказ'; btn.classList.add('ok'); }
+  else         btn.textContent = 'Далее →';
+
+  body.scrollTop = 0;
+  fixH();
+
+  if (n === 1) setTimeout(function(){ var inp = document.getElementById('objInp'); if(inp) inp.focus(); }, 300);
+}
+
+function onNext() {
+  if (step === 1) {
+    var v = document.getElementById('objInp').value.trim();
+    var addr = document.getElementById('objAddr').value.trim();
+    var err = false;
+
+    if (!v) {
+      document.getElementById('objInp').classList.add('herr');
+      document.getElementById('objErr').classList.add('show');
+      err = true;
+    } else {
+      document.getElementById('objInp').classList.remove('herr');
+      document.getElementById('objErr').classList.remove('show');
+    }
+
+    if (!addr) {
+      document.getElementById('objAddr').classList.add('herr');
+      document.getElementById('addrErr').classList.add('show');
+      err = true;
+    } else {
+      document.getElementById('objAddr').classList.remove('herr');
+      document.getElementById('addrErr').classList.remove('show');
+    }
+
+    if (err) return;
+
+    if (GAS_URL) {
+      var cmt  = document.getElementById('objCmt').value.trim();
+      fetch(GAS_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'save_object', data: { name: v, address: addr, comment: cmt } })
+      }).catch(function(){});
+    }
+
+    showStep(2, 'f');
+    return;
+  }
+
+  if (step === 2) {
+    var items = collect();
+    if (!items || !items.length) return;
+    showStep(3, 'f');
+    return;
+  }
+
+  if (step === 3) {
+    if (!priority) {
+      document.getElementById('prioErr').classList.add('show');
+      return;
+    }
+    document.getElementById('prioErr').classList.remove('show');
+    buildConfirm();
+    showStep(4, 'f');
+    return;
+  }
+
+  if (step === 4) {
+    var obj  = document.getElementById('objInp').value.trim();
+    var its  = collect();
+    if (!its || !its.length){ showStep(2); return; }
+
+    var btn = document.getElementById('btnNext');
+    btn.disabled = true;
+    btn.textContent = '⏳ Отправка...';
+
+    var objData = getObjData();
+
+    submitOrder(obj, objData, its, priority, function(){
+      showSucc();
+    }, function(){
+      btn.textContent = '❌ Ошибка — повторить';
+      btn.className = 'bnx bad'; btn.disabled = false;
+      setTimeout(function(){ btn.textContent = '📤 Отправить заказ'; btn.className = 'bnx ok'; }, 3000);
+    });
+  }
+}
+
+function onBack() {
+  if (step > 1) showStep(step - 1, 'b');
+}
+
+// ─── OBJECT AUTOCOMPLETE (ИСПРАВЛЕНО) ──────────────────────────
+function acObj(inp, drop) {
+  function getNames() { return OBJ_HINTS.map(function(o){ return o.name; }); }
+
+  function show(val) {
+    var q = val.trim().toLowerCase();
+    var names = getNames();
+    var m = (q ? names.filter(function(s){ return s.toLowerCase().includes(q); }) : names).slice(0, 30);
+    drop.innerHTML = '';
+    if (!m.length){ drop.classList.remove('open'); return; }
+    m.forEach(function(s){
+      var d = document.createElement('div');
+      d.className = 'ditem'; d.textContent = s;
+      
+      // Используем mousedown вместо click, чтобы событие срабатывало ДО blur инпута
+      d.addEventListener('mousedown', function(e){ 
+        e.preventDefault(); // Защита от потери фокуса инпутом
+        inp.value = s;
+        drop.classList.remove('open');
+        inp.classList.remove('herr');
+        fillObjExtra(s);
+      });
+      drop.appendChild(d);
+    });
+    drop.classList.add('open');
+  }
+
+  inp.addEventListener('input', function(){
+    show(inp.value);
+    checkObjNew(inp.value.trim());
+  });
+  inp.addEventListener('focus',  function(){ show(inp.value); });
+  inp.addEventListener('blur',   function(){ drop.classList.remove('open'); });
+}
+
+function fillObjExtra(name) {
+  var obj = OBJ_HINTS.find(function(o){ return o.name === name; });
+  var extra = document.getElementById('objExtra');
+  extra.style.display = 'block';
+  isNewObj = false;
+
+  var addrInp = document.getElementById('objAddr');
+  var cmtInp  = document.getElementById('objCmt');
+
+  addrInp.value = '';
+  cmtInp.value  = '';
+  
+  addrInp.classList.remove('herr');
+  document.getElementById('addrErr').classList.remove('show');
+
+  if (obj) {
+    document.getElementById('objExtraTitle').innerHTML = 'Данные объекта';
+  } else {
+    isNewObj = true;
+    document.getElementById('objExtraTitle').innerHTML =
+      'Данные объекта <span class="new-badge">Новый</span>';
+  }
+}
+
+function checkObjNew(val) {
+  if (!val) {
+    document.getElementById('objExtra').style.display = 'none';
+    isNewObj = false;
+    return;
+  }
+  var exists = OBJ_HINTS.some(function(o){ return o.name.toLowerCase() === val.toLowerCase(); });
+  if (!exists) {
+    fillObjExtra(val);
+  } else {
+    var extra = document.getElementById('objExtra');
+    if (extra.style.display !== 'block') {
+      fillObjExtra(val);
+    }
+  }
+}
+
+function getObjData() {
+  return {
+    address: document.getElementById('objAddr').value.trim(),
+    comment: document.getElementById('objCmt').value.trim()
+  };
+}
+
+// ─── PRIORITY ─────────────────────────────────────────────────
+function setPrio(val) {
+  priority = val;
+  ['low','medium','high'].forEach(function(p){
+    var btn = document.getElementById('prio-' + p);
+    btn.className = 'prio-btn' + (p === val ? ' sel-' + p : '');
+  });
+  document.getElementById('prioErr').classList.remove('show');
+}
+
+// ─── ITEMS ────────────────────────────────────────────────────
+function addItem() {
+  icnt++;
+  var id  = icnt;
+  var div = document.createElement('div');
+  div.className = 'icard'; div.id = 'card' + id; div.setAttribute('data-id', id);
+  div.innerHTML =
+    '<div class="irow">' +
+      '<div class="inwrap">' +
+        '<input type="text" id="n'+id+'" placeholder="Название товара" autocomplete="off">' +
+        '<div class="drop" id="pd'+id+'"></div>' +
+        '<div class="emsg" id="ne'+id+'">Укажите товар</div>' +
+      '</div>' +
+      '<div class="iqwrap">' +
+        '<input type="number" id="q'+id+'" value="1" min="1" inputmode="numeric">' +
+      '</div>' +
+      '<button class="rmbtn" onclick="rmItem('+id+')">×</button>' +
+    '</div>' +
+    '<div class="tcmt" onclick="togCmt('+id+')">' +
+      '<span class="ic" id="ic'+id+'">+</span><span>Комментарий</span>' +
+    '</div>' +
+    '<div class="carea" id="ca'+id+'">' +
+      '<textarea id="c'+id+'" placeholder="Комментарий к товару..."></textarea>' +
+    '</div>';
+  document.getElementById('ilist').appendChild(div);
+
+  acProd(document.getElementById('n'+id), document.getElementById('pd'+id));
+  setupQ(id);
+
+  document.getElementById('n'+id).addEventListener('focus', function(){
+    var a = document.getElementById('anchor');
+    if (a) setTimeout(function(){ a.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, 100);
+  });
+  if (icnt > 1) setTimeout(function(){ div.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 100);
+}
+
+function rmItem(id) {
+  var el = document.getElementById('card' + id);
+  if (el) el.remove();
+  if (!document.getElementById('ilist').children.length) addItem();
+}
+
+document.getElementById('objAddr').addEventListener('input', function(){
+  if (this.value.trim()) {
+    this.classList.remove('herr');
+    document.getElementById('addrErr').classList.remove('show');
+  }
+});
+
+function setupQ(id) {
+  var q = document.getElementById('q' + id);
+  if (!q) return;
+  q._isDefault = true;
+  q.addEventListener('focus', function(){
+    if (this._isDefault) {
+      var self = this;
+      setTimeout(function(){ self.select(); }, 0);
+    }
+  });
+  q.addEventListener('keypress', function(e){ if (e.charCode < 48 || e.charCode > 57) e.preventDefault(); });
+  q.addEventListener('paste',    function(e){ e.preventDefault(); });
+  q.addEventListener('input',    function(){
+    this.value = this.value.replace(/[^0-9]/g,'');
+    if (this.value===''||parseInt(this.value)<1) this.value=1;
+    this._isDefault = false;
+  });
+  q.addEventListener('blur', function(){
+    var v=parseInt(this.value);
+    if(!this.value.trim()||isNaN(v)||v<1){ this.value=1; this._isDefault=true; }
+    this.classList.remove('herr');
+  });
+}
+
+function togCmt(id) {
+  var ca = document.getElementById('ca'+id); var ic = document.getElementById('ic'+id);
+  var open = ca.classList.toggle('open'); ic.textContent = open ? '−' : '+';
+  if (open) setTimeout(function(){ var ta=document.getElementById('c'+id); if(ta) ta.focus(); }, 100);
+}
+
+// ─── PRODUCT AUTOCOMPLETE (ИСПРАВЛЕНО) ─────────────────────────
+function acProd(inp, drop) {
+  function show(val) {
+    var q = val.trim().toLowerCase();
+    var m = (q ? PROD_HINTS.filter(function(s){ return s.toLowerCase().includes(q); }) : PROD_HINTS).slice(0, 30);
+    drop.innerHTML = '';
+    if (!m.length){ drop.classList.remove('open'); return; }
+    m.forEach(function(s){
+      var d = document.createElement('div');
+      d.className = 'ditem'; d.textContent = s;
+      
+      // Использование mousedown решает проблему мгновенного выбора и скрытия подсказки
+      d.addEventListener('mousedown', function(e){ 
+        e.preventDefault(); 
+        inp.value = s; 
+        drop.classList.remove('open'); 
+        inp.classList.remove('herr'); 
+      });
+      drop.appendChild(d);
+    });
+    drop.classList.add('open');
+  }
+  inp.addEventListener('input',  function(){ show(inp.value); });
+  inp.addEventListener('focus',  function(){ show(inp.value); });
+  inp.addEventListener('blur',   function(){ drop.classList.remove('open'); });
+}
+
+function collect() {
+  var cards = document.getElementById('ilist').querySelectorAll('.icard');
+  var items = [], ok = true;
+  cards.forEach(function(card){
+    var id  = card.getAttribute('data-id');
+    var nEl = document.getElementById('n'+id);
+    var qEl = document.getElementById('q'+id);
+    var nEr = document.getElementById('ne'+id);
+    if (!nEl) return;
+    var nv = nEl.value.trim();
+    var qv = parseInt(qEl ? qEl.value : '1') || 1;
+    var cv = (document.getElementById('c'+id)||{}).value||'';
+    if (!nv){ nEl.classList.add('herr'); if(nEr) nEr.classList.add('show'); ok=false; }
+    else    { nEl.classList.remove('herr'); if(nEr) nEr.classList.remove('show'); items.push({ name:nv, qty:Math.max(1,qv), comment:cv.trim() }); }
+  });
+  return ok ? items : null;
+}
+
+// ─── CONFIRM ──────────────────────────────────────────────────
+function buildConfirm() {
+  var objName = document.getElementById('objInp').value.trim();
+  var objData = getObjData();
+  var prioMap = { low: { label: 'Низкий', cls: 'low', ico: '🟢' }, medium: { label: 'Средний', cls: 'medium', ico: '🟡' }, high: { label: 'Высокий', cls: 'high', ico: '🔴' } };
+  var p = prioMap[priority] || { label: '', cls: '', ico: '' };
+
+  document.getElementById('cobj').textContent = objName;
+  var addrEl = document.getElementById('cobjAddr');
+  var cmtEl  = document.getElementById('cobjCmt');
+  addrEl.textContent = objData.address ? 'Номер заказа: ' + objData.address : '';
+  cmtEl.textContent  = objData.comment ? '💬 ' + objData.comment : '';
+
+  document.getElementById('cprioWrap').innerHTML =
+    '<span class="cprio ' + p.cls + '">' + p.ico + ' ' + p.label + '</span>';
+
+  var cards = document.getElementById('ilist').querySelectorAll('.icard');
+  var cont  = document.getElementById('citems');
+  cont.innerHTML = '';
+  var idx = 0;
+  cards.forEach(function(card){
+    var id  = card.getAttribute('data-id');
+    var nEl = document.getElementById('n'+id);
+    var qEl = document.getElementById('q'+id);
+    var cEl = document.getElementById('c'+id);
+    if (!nEl) return;
+    var nv = nEl.value.trim(); var qv = parseInt(qEl?qEl.value:'1')||1; var cv = cEl?cEl.value.trim():'';
+    if (!nv) return;
+    idx++;
+    var row = document.createElement('div');
+    row.className = 'citem';
+    row.innerHTML = '<div class="cnum">'+idx+'</div><div style="flex:1"><div class="cname">'+esc(nv)+'</div>'+(cv?'<div class="ccmt">'+esc(cv)+'</div>':'')+'</div><div class="cqty">'+qv+' шт.</div>';
+    cont.appendChild(row);
+  });
+}
+
+// ─── SUBMIT ORDER ─────────────────────────────────────────────
+function submitOrder(obj, objData, items, prio, onOk, onErr) {
+  if (!GAS_URL) { onErr(); return; }
+  fetch(GAS_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({
+      action: 'order',
+      data: {
+        user_id:        USER_ID,
+        username:       USERNAME,
+        name:           USER_NAME,
+        chat_id:        CHAT_ID,
+        message_id:     MESSAGE_ID,
+        object:         obj,
+        object_address: objData.address,
+        object_comment: objData.comment,
+        priority:       prio,
+        items:          items
+      }
+    })
+  }).then(function(){ onOk(); }).catch(function(){ onErr(); });
+}
+
+// ─── SUCCESS ──────────────────────────────────────────────────
+function showSucc() {
+  if (APP_MODE === 'purchase') {
+    document.getElementById('succIco').textContent = '✅';
+    document.getElementById('succTit').textContent = 'Чек отправлен!';
+    document.getElementById('succSub').textContent = 'Чек успешно загружен в систему';
+    document.getElementById('btnNew').textContent  = '🧾 Загрузить ещё чек';
+  } else {
+    document.getElementById('succIco').textContent = '✅';
+    document.getElementById('succTit').textContent = 'Заказ отправлен!';
+    document.getElementById('succSub').textContent = 'Детали заказа отправлены вам в чат';
+    document.getElementById('btnNew').textContent  = '🛒 Создать новый заказ';
+  }
+  document.getElementById('succ').classList.add('show');
+}
+
+function onNewOrder() {
+  document.getElementById('succ').classList.remove('show');
+  document.getElementById('ilist').innerHTML = '';
+  document.getElementById('objInp').value = '';
+  document.getElementById('objAddr').value = '';
+  document.getElementById('objCmt').value = '';
+  document.getElementById('objExtra').style.display = 'none';
+  priority = '';
+  isNewObj = false;
+  ['low','medium','high'].forEach(function(p){ document.getElementById('prio-'+p).className='prio-btn'; });
+  icnt = 0;
+  showStep(1);
+  addItem();
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+startup();
+</script>
+</body>
+</html>
